@@ -16,6 +16,9 @@ func main() {
 	if err := store.InitDB(); err != nil {
 		log.Fatal().Err(err).Msg("Init DB failed")
 	}
+	if err := store.AutoMigrate(); err != nil {
+		log.Fatal().Err(err).Msg("AutoMigrate DB failed")
+	}
 
 	app := fiber.New()
 	app.Get("/hello", handlers.HandleHello)

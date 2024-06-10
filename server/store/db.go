@@ -20,7 +20,16 @@ func InitDB() error {
 		log.Error().Err(err).Send()
 		return err
 	}
+	db = db.Debug()
 
 	log.Info().Msg("DB initialized")
+	return nil
+}
+
+func AutoMigrate() error {
+	if err := db.AutoMigrate(&Note{}); err != nil {
+		log.Error().Err(err).Send()
+		return err
+	}
 	return nil
 }
