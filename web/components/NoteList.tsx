@@ -15,6 +15,7 @@ const NoteList: React.FC<NoteListProps> = ({ notes, onSelect }) => {
     return <li
       className="p-4 bg-white border border-gray-300 cursor-pointer"
       onClick={() => onSelect(note.id)}
+      key={note.id}
     >
       {note.content.slice(0, 15)}
     </li>

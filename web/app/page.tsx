@@ -18,7 +18,7 @@ const getAllNotes = async () => {
     body: JSON.stringify({})
   })
   const notes = await resp.json()
-  return notes['notes'].map((note) => (
+  return notes['notes'].map((note: any) => (
     { id: note['id'], content: note['content'] }
   ))
 }
