@@ -27,7 +27,8 @@ func main() {
 
 	app := fiber.New()
 	app.Get("/hello", handlers.HandleHello)
-	app.Get("/api/get_all_notes", handlers.HandleGetAllNotes)
+	app.Post("/api/get_all_notes", handlers.HandleGetAllNotes)
+	app.Post("/api/get_note_by_id", handlers.HandleGetNoteByID)
 	app.Post("/api/create_note", handlers.HandleCreateNote)
 	app.Post("/api/update_note", handlers.HandleUpdateNote)
 	if err := app.Listen(listenAddr); err != nil {
