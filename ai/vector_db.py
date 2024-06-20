@@ -1,32 +1,25 @@
-import os
-from typing import List, Tuple
+from typing import List
 
-import duckdb
-import pandas as pd
+import chromadb
+from chromadb.utils.embedding_functions import ONNXMiniLM_L6_V2
 
-DATAPATH: str = "data.duckdb"
+from entity import Chunk, Retrieval
 
 
 class VectorDB:
     def __init__(self, datapath: str):
         self.datapath: str = datapath
-        if not os.path.exists(datapath):
-            with open("resource/init.sql") as f:
-                self.execute(f.read())
+        self.client = chromadb.PersistentClient(path=datapath)
+        self.collection = self.client.get_or_create_collection(
+            name="default", metadata={"hnsw:space": "cosine"}, embedding_function=ONNXMiniLM_L6_V2())
 
-    def execute(self, query, parameters: Tuple = None, multiple_parameter_sets: bool = False):
-        with duckdb.connect(self.datapath) as connection:
-            connection.install_extension("vss")
-            connection.load_extension("vss")
-            return connection.execute(query, parameters, multiple_parameter_sets).df()
+    def insert(self, chunk_list: List[Chunk]):
+        self.collection.add(documents=[c.text for c in chunk_list], ids=[c.id for c in chunk_list])
 
-    def insert(self, doc_id, vector: List[float]):
-        return self.execute("INSERT INTO vectors VALUES (?, ?);", (doc_id, vector))
-
-    def query(self, vector: List[float], k: int) -> pd.DataFrame:
-        return self.execute("""
-            SELECT doc_id, vec, array_cosine_similarity(vec, CAST(? AS VECTOR)) AS similarity
-            FROM vectors
-            ORDER BY similarity DESC
-            LIMIT ?;
-        """, (vector, k))
+    def query(self, query: str, k: int) -> List[Retrieval]:
+        batch_result_list: chromadb.QueryResult = self.collection.query(query_texts=[query], n_results=k)
+        result_list: List[Retrieval] = []
+        for idx, distance, document in zip(
+                batch_result_list["ids"][0], batch_result_list["distances"][0], batch_result_list["documents"][0]):
+            result_list.append((Chunk(id=idx, text=document), distance))
+        return result_list
