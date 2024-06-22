@@ -29,7 +29,7 @@ class RAG:
         self.retriever: Retriever = retriever
         self.client = OpenAI(base_url=os.environ["OPENAI_BASE_URL"], api_key=os.environ["OPENAI_API_KEY"])
         self.chat = partial(self.client.chat.completions.create, model=os.environ["OPENAI_MODEL_NAME"])
-        with open('resource/prompt.txt') as f:
+        with open('../resource/prompt.txt') as f:
             self.prompt: str = f.read()
 
     @classmethod
