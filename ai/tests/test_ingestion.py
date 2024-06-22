@@ -2,7 +2,9 @@ import pytest
 
 from core.ingestion import split_markdown
 
-markdown_text = """First part
+
+def test_ingestion():
+    markdown_text = """First part
 # Level 1
 ## Level 2
 Some text
@@ -12,17 +14,11 @@ More text
 ## Level 2
 Last part"""
 
-
-def test_ingestion():
     chunk_list = split_markdown("asdf", markdown_text)
     assert len(chunk_list) == 7
-
-
-@pytest.mark.skip
-def test_llama_index():
-    from llama_index.core.node_parser import MarkdownNodeParser
-    from llama_index.core import Document
-
-    parser = MarkdownNodeParser()
-    nodes = parser.get_nodes_from_documents([Document(text=markdown_text)])
-    print(nodes)
+    for i in [0, 1, 2, 5]:
+        assert chunk_list[i].parent_chunk_id is None
+    for i in [3, 4]:
+        assert chunk_list[i].parent_chunk_id == chunk_list[2].chunk_id
+    for i in [6]:
+        assert chunk_list[i].parent_chunk_id == chunk_list[5].chunk_id
