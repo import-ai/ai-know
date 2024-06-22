@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 import requests
 from openai import OpenAI
 
-from entity import Retrieval
+from core.entity import Chunk as Retrieval
 
 
 class Retriever:
@@ -38,7 +38,7 @@ class RAG:
         for retrieval in retrieval_list:
             prompt_list: List[str] = [
                 f"[[{retrieval.id}]]",
-                f"Content: {retrieval.content}",
+                f"Content: {retrieval.text}",
             ]
             retrival_prompt_list.append("\n".join(prompt_list))
         return "\n\n".join(retrival_prompt_list)

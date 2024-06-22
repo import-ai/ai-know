@@ -1,5 +1,3 @@
-from typing import List, Tuple
-
 from pydantic import BaseModel, Field
 
 
@@ -8,4 +6,9 @@ class Chunk(BaseModel):
     text: str = Field(description="Chunk content")
 
 
-Retrieval = Tuple[Chunk, float]
+class Retrieval(BaseModel):
+    chunk: Chunk
+    distance: float
+
+
+__all__ = ["Chunk", "Retrieval"]
