@@ -6,7 +6,7 @@ from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunct
 from core.entity import Chunk, Retrieval
 
 
-class Recall:
+class Embedding:
     def __init__(self, datapath: str, model_name: str = "BAAI/bge-m3", device: str = "cpu"):
         self.datapath: str = datapath
         self.client = chromadb.PersistentClient(path=datapath)
@@ -16,7 +16,7 @@ class Recall:
         )
 
     def insert(self, chunk_list: List[Chunk]):
-        self.collection.add(documents=[c.text for c in chunk_list], ids=[c.id for c in chunk_list])
+        self.collection.add(documents=[c.text for c in chunk_list], ids=[c.doc_id for c in chunk_list])
 
     def query(self, query: str, k: int) -> List[Retrieval]:
         batch_result_list: chromadb.QueryResult = self.collection.query(query_texts=[query], n_results=k)

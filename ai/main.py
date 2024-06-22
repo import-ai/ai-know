@@ -29,7 +29,7 @@ class RAG:
         self.retriever: Retriever = retriever
         self.client = OpenAI(base_url=os.environ["OPENAI_BASE_URL"], api_key=os.environ["OPENAI_API_KEY"])
         self.chat = partial(self.client.chat.completions.create, model=os.environ["OPENAI_MODEL_NAME"])
-        with open('prompt.txt') as f:
+        with open('resource/prompt.txt') as f:
             self.prompt: str = f.read()
 
     @classmethod
@@ -37,7 +37,7 @@ class RAG:
         retrival_prompt_list: List[str] = []
         for retrieval in retrieval_list:
             prompt_list: List[str] = [
-                f"[[{retrieval.id}]]",
+                f"[[{retrieval.doc_id}]]",
                 f"Content: {retrieval.text}",
             ]
             retrival_prompt_list.append("\n".join(prompt_list))
