@@ -1,5 +1,8 @@
 from contextlib import asynccontextmanager
-from typing import List
+import json
+from functools import partial
+from typing import List, Iterator
+from sse_starlette import EventSourceResponse
 
 import uvicorn
 from fastapi import FastAPI, Request, status
@@ -12,6 +15,7 @@ from core.embedding import Embedding
 from core.entity import Chunk, Retrieval
 from core.ingestion import split_markdown
 from core.logger import get_logger
+from core.rag import RAG
 
 
 class InsertRequest(BaseModel):
@@ -19,22 +23,26 @@ class InsertRequest(BaseModel):
     content: str = Field(description="Document content")
 
 
+dumps = partial(json.dumps, ensure_ascii=False, separators=(",", ":"))
+
 config: Config = load_config()
 logger = get_logger(__name__)
 embedding: Embedding = ...
+rag: RAG = ...
 
 
 def init():
-    global embedding
+    global embedding, rag
     embedding = Embedding("chroma_data", config.embedding_model_name_or_path, config.device)
+    rag = RAG()
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     init()
     yield
-    global embedding
-    del embedding
+    global embedding, rag
+    del embedding, rag
 
 
 app = FastAPI(lifespan=lifespan, title="AI Knowledge", version="0.0.1", description="")
@@ -66,9 +74,22 @@ async def create_or_update(doc_id: str, request: InsertRequest):
 
 
 @app.get("/api/index/recall", response_model=List[Retrieval])
-async def recall(query: str, k: int = 10):
+async def recall(query: str, k: int):
     retrieval_list: List[Retrieval] = embedding.query(query, k)
     return retrieval_list
+
+
+def stream_chat(query: str) -> Iterator[str]:
+    retrieval_list: List[Retrieval] = embedding.query(query, 30)
+    for delta in rag.chat(query, retrieval_list):  # TODO Add rerank
+        yield dumps({"response_type": "delta", "content": delta})
+    yield dumps({"response_type": "citation", "content": [r.chunk.model_dump() for r in retrieval_list]})
+    yield '[DONE]'
+
+
+@app.post("/api/chat")
+async def api_chat(query: str):
+    return EventSourceResponse(stream_chat(query))
 
 
 # healthcheck
