@@ -16,12 +16,20 @@ class Embedding:
         )
 
     def insert(self, chunk_list: List[Chunk]):
-        self.collection.add(documents=[c.text for c in chunk_list], ids=[c.doc_id for c in chunk_list])
+        self.collection.add(
+            documents=[c.text for c in chunk_list],
+            ids=[c.chunk_id for c in chunk_list],
+            metadatas=[c.metadata for c in chunk_list]
+        )
 
     def query(self, query: str, k: int) -> List[Retrieval]:
         batch_result_list: chromadb.QueryResult = self.collection.query(query_texts=[query], n_results=k)
         result_list: List[Retrieval] = []
-        for idx, distance, document in zip(
-                batch_result_list["ids"][0], batch_result_list["distances"][0], batch_result_list["documents"][0]):
-            result_list.append(Retrieval(chunk=Chunk(id=idx, text=document), distance=distance))
+        for chunk_id, document, metadata, distance in zip(
+                batch_result_list["ids"][0],
+                batch_result_list["documents"][0],
+                batch_result_list["metadatas"][0],
+                batch_result_list["distances"][0],
+        ):
+            result_list.append(Retrieval(chunk=Chunk(chunk_id=chunk_id, text=document, **metadata), distance=distance))
         return result_list

@@ -14,11 +14,14 @@ More text
 ## Level 2
 Last part"""
 
-    chunk_list = split_markdown("asdf", markdown_text)
-    assert len(chunk_list) == 7
-    for i in [0, 1, 2, 5]:
+    chunk_list = split_markdown("id", "title", markdown_text)
+    offset: int = 2
+    assert len(chunk_list) == offset + 6
+    for i in range(offset + 1):
         assert chunk_list[i].parent_chunk_id is None
-    for i in [3, 4]:
-        assert chunk_list[i].parent_chunk_id == chunk_list[2].chunk_id
-    for i in [6]:
-        assert chunk_list[i].parent_chunk_id == chunk_list[5].chunk_id
+    for i in [1, 4]:
+        assert chunk_list[i + offset].parent_chunk_id is None
+    for i in [2, 3]:
+        assert chunk_list[i + offset].parent_chunk_id == chunk_list[1 + offset].chunk_id
+    for i in [5]:
+        assert chunk_list[i + offset].parent_chunk_id == chunk_list[4 + offset].chunk_id

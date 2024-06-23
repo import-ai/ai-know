@@ -11,11 +11,15 @@ logger = get_logger(__name__)
 
 
 class Config(BaseModel):
+    port: int = Field(default=8000)
+    workers: int = Field(default=1)
+
     openai_api_key: str
     openai_model: str = Field(default="gpt-3.5-turbo")
     openai_base_url: str = Field(default="https://api.openai.com/v1")
 
     embedding_model_name_or_path: str = Field(default="BAAI/bge-m3")
+    device: str = Field(default="cpu")
 
 
 def load_from_config_file(yaml_path: str = "config.yaml") -> Dict[str, str]:
