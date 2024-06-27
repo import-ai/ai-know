@@ -1,19 +1,10 @@
 package store
 
 import (
-	"time"
-
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
-
-type Note struct {
-	ID        int64 `gorm:"primarykey"`
-	Content   string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
 
 func GetAllNotes() ([]*Note, error) {
 	tx := db.Model(&Note{})
