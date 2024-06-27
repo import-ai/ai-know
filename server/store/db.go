@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
+var allModels []interface{}
 var db *gorm.DB
 
 func InitDB() error {
@@ -23,7 +24,7 @@ func InitDB() error {
 }
 
 func AutoMigrate() error {
-	if err := db.AutoMigrate(&User{}, &KB{}, &Note{}); err != nil {
+	if err := db.AutoMigrate(allModels...); err != nil {
 		log.Error().Err(err).Send()
 		return err
 	}

@@ -30,3 +30,9 @@ type Note struct {
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
+
+func init() {
+	allModels = append(allModels, &User{})
+	allModels = append(allModels, &KB{})
+	allModels = append(allModels, &Note{})
+}

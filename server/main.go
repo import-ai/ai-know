@@ -28,9 +28,3 @@ func main() {
 		log.Fatal().Err(err).Send()
 	}
 }
-
-// Knowledge Base
-// /kbs/{kb_id}
-// /kbs/{kb_id}/notes
-// /kbs/{kb_id}/notes/{note_id}
-// Note
