@@ -7,7 +7,8 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/ycdzj/shuinotes/server/config"
-	"github.com/ycdzj/shuinotes/server/handlers"
+	"github.com/ycdzj/shuinotes/server/middlewares"
+	"github.com/ycdzj/shuinotes/server/routes"
 	"github.com/ycdzj/shuinotes/server/store"
 )
 
@@ -23,7 +24,8 @@ func main() {
 	}
 
 	app := fiber.New()
-	handlers.RegisterRoutes(app)
+	middlewares.RegisterMiddlewares(app)
+	routes.RegisterRoutes(app)
 	if err := app.Listen(config.ListenAddr()); err != nil {
 		log.Fatal().Err(err).Send()
 	}
