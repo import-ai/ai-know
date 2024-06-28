@@ -4,6 +4,7 @@ services:
     volumes:
       - ${PWD}:/app
       - /etc/localtime:/etc/localtime:ro
+      - ${PWD}/cache:/root/.cache/
     working_dir: /app
     ports:
       - "${PORT}:${PORT}"
