@@ -6,12 +6,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func RegisterRecover(router fiber.Router) {
+func NewRecover() fiber.Handler {
 	config := recover.Config{
 		EnableStackTrace: true,
 		StackTraceHandler: func(c *fiber.Ctx, e interface{}) {
 			log.Error().Interface("error", e).Msg("Panic recovered")
 		},
 	}
-	router.Use(recover.New(config))
+	return recover.New(config)
 }

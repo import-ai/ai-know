@@ -3,10 +3,21 @@ package routes
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/ycdzj/shuinotes/server/handlers"
+	"github.com/ycdzj/shuinotes/server/middlewares"
 )
 
-func RegisterRoutes(router fiber.Router) {
-	prefix := router.Group("/kbs")
+func RegisterRoutes(router fiber.Router, jwtSecretKey string) {
+	router.Use(middlewares.NewRecover())
+
+	router.Post("/login", handlers.HandleLogin)
+	router.Post("/users", handlers.HandleCreateUser)
+
+	router.Use(middlewares.NewJWTAuth(jwtSecretKey))
+
+	prefix := router.Group("/users/:user_name")
+	prefix.Get("", handlers.HandleGetUser)
+
+	prefix = router.Group("/kbs")
 	prefix.Get("", handlers.HandleListKBs)
 	prefix.Post("", handlers.HandleCreateKB)
 
@@ -15,11 +26,11 @@ func RegisterRoutes(router fiber.Router) {
 	prefix.Put("", handlers.HandleUpdateKB)
 	prefix.Delete("", handlers.HandleDeleteKB)
 
-	prefix = router.Group("kbs/:kb_id/notes")
+	prefix = router.Group("/kbs/:kb_id/notes")
 	prefix.Get("", handlers.HandleListNotes)
 	prefix.Post("", handlers.HandleCreateNote)
 
-	prefix = router.Group("kbs/:kb_id/notes/:note_id")
+	prefix = router.Group("/kbs/:kb_id/notes/:note_id")
 	prefix.Get("", handlers.HandleGetNote)
 	prefix.Put("", handlers.HandleUpdateNote)
 	prefix.Delete("", handlers.HandleDeleteNote)
