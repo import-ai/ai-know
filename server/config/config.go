@@ -6,28 +6,37 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var dsn string
+var dataSourceName string
 var listenAddr string
+var jwtSecretKey string
 
 func InitFromEnv() {
 	listenAddr = os.Getenv("API_LISTEN_ADDR")
-	dsn = os.Getenv("API_DSN")
+	dataSourceName = os.Getenv("API_DATA_SOURCE_NAME")
+	jwtSecretKey = os.Getenv("API_JWT_SECRET_KEY")
 	checkConfig()
 }
 
 func checkConfig() {
 	if listenAddr == "" {
-		log.Fatal().Msg("Listen address is empty")
+		log.Fatal().Msg("Listen Address is empty")
 	}
-	if dsn == "" {
-		log.Fatal().Msg("DSN is empty")
+	if dataSourceName == "" {
+		log.Fatal().Msg("Data Source Name is empty")
+	}
+	if jwtSecretKey == "" {
+		log.Fatal().Msg("JWT Secret Key is empty")
 	}
 }
 
-func DSN() string {
-	return dsn
+func DataSourceName() string {
+	return dataSourceName
 }
 
 func ListenAddr() string {
 	return listenAddr
+}
+
+func JWTSecretKey() string {
+	return jwtSecretKey
 }

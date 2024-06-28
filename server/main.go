@@ -15,7 +15,7 @@ func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	config.InitFromEnv()
 
-	if err := store.InitDB(); err != nil {
+	if err := store.InitDB(config.DataSourceName()); err != nil {
 		log.Fatal().Err(err).Msg("Init DB failed")
 	}
 	if err := store.AutoMigrate(); err != nil {

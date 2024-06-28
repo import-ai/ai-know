@@ -2,7 +2,6 @@ package store
 
 import (
 	"github.com/rs/zerolog/log"
-	"github.com/ycdzj/shuinotes/server/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -10,9 +9,9 @@ import (
 var allModels []interface{}
 var db *gorm.DB
 
-func InitDB() error {
+func InitDB(dataSourceName string) error {
 	var err error
-	db, err = gorm.Open(postgres.Open(config.DSN()), &gorm.Config{})
+	db, err = gorm.Open(postgres.Open(dataSourceName), &gorm.Config{})
 	if err != nil {
 		log.Error().Err(err).Send()
 		return err
