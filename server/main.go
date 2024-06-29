@@ -23,7 +23,7 @@ func main() {
 	}
 
 	app := fiber.New()
-	routes.RegisterRoutes(app, config.JWTSecretKey())
+	routes.RegisterRoutes(app)
 	if err := app.Listen(config.ListenAddr()); err != nil {
 		log.Fatal().Err(err).Send()
 	}

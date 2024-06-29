@@ -40,3 +40,7 @@ func ListenAddr() string {
 func JWTSecretKey() string {
 	return jwtSecretKey
 }
+
+func JWTCookieName() string {
+	return "token"
+}
