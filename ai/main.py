@@ -17,12 +17,6 @@ from core.ingestion import split_markdown
 from core.logger import get_logger
 from core.rag import RAG
 
-
-class InsertRequest(BaseModel):
-    title: str = Field(description="Document title")
-    content: str = Field(description="Document content")
-
-
 dumps = partial(json.dumps, ensure_ascii=False, separators=(",", ":"))
 
 config: Config = load_config()
@@ -31,9 +25,14 @@ embedding: Embedding = ...
 rag: RAG = ...
 
 
+class InsertRequest(BaseModel):
+    title: str = Field(description="Document title")
+    content: str = Field(description="Document content")
+
+
 def init():
     global embedding, rag
-    embedding = Embedding("chroma_data", config.embedding_model_name_or_path, config.device)
+    embedding = Embedding(config.data_dir, config.embedding_model_name_or_path, config.device)
     rag = RAG()
 
 

@@ -21,6 +21,8 @@ class Config(BaseModel):
     embedding_model_name_or_path: str = Field(default="BAAI/bge-m3")
     device: str = Field(default="cpu")
 
+    data_dir: str = Field(default="chroma_data")
+
 
 def load_from_config_file(yaml_path: str = "config.yaml") -> Dict[str, str]:
     if os.path.exists(yaml_path):
