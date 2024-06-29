@@ -16,7 +16,6 @@ func InitDB(dataSourceName string) error {
 		log.Error().Err(err).Send()
 		return err
 	}
-	db = db.Debug()
 
 	log.Info().Msg("DB initialized")
 	return nil
@@ -28,4 +27,8 @@ func AutoMigrate() error {
 		return err
 	}
 	return nil
+}
+
+func DB() *gorm.DB {
+	return db.Debug()
 }
