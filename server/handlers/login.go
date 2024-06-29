@@ -45,10 +45,10 @@ func HandleLogin(c *fiber.Ctx) error {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user": user.UniqueName,
-		"exp":  time.Now().Add(time.Hour * 24),
+		"exp":  time.Now().Add(time.Hour * 24).Unix(),
 	})
 
-	tokenStr, err := token.SignedString(config.JWTSecretKey())
+	tokenStr, err := token.SignedString([]byte(config.JWTSecretKey()))
 	if err != nil {
 		log.Error().Err(err).Send()
 		return fiber.ErrInternalServerError

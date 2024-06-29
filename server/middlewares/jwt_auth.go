@@ -21,7 +21,7 @@ func NewJWTAuth(cfg *JWTAuthConfig) fiber.Handler {
 		}
 
 		token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
-			return cfg.SecretKey, nil
+			return []byte(cfg.SecretKey), nil
 		})
 		if err != nil {
 			log.Error().Err(err).Send()
@@ -34,7 +34,7 @@ func NewJWTAuth(cfg *JWTAuthConfig) fiber.Handler {
 		}
 
 		exp, err := claims.GetExpirationTime()
-		if !exp.Before(time.Now()) {
+		if !exp.After(time.Now()) {
 			return fiber.ErrUnauthorized
 		}
 

@@ -21,14 +21,14 @@ func InitDB(dataSourceName string) error {
 	return nil
 }
 
+func DB() *gorm.DB {
+	return db.Debug()
+}
+
 func AutoMigrate() error {
-	if err := db.AutoMigrate(allModels...); err != nil {
+	if err := DB().AutoMigrate(allModels...); err != nil {
 		log.Error().Err(err).Send()
 		return err
 	}
 	return nil
-}
-
-func DB() *gorm.DB {
-	return db.Debug()
 }

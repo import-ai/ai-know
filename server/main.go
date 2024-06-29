@@ -13,6 +13,7 @@ import (
 
 func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	log.Logger = log.With().Caller().Logger()
 	config.InitFromEnv()
 
 	if err := store.InitDB(config.DataSourceName()); err != nil {
