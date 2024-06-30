@@ -3,6 +3,7 @@ package handlers
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
+	"github.com/ycdzj/shuinotes/server/rpc/ai"
 	"github.com/ycdzj/shuinotes/server/store"
 	"github.com/ycdzj/shuinotes/server/utils"
 )
@@ -154,6 +155,14 @@ func HandleCreateNote(c *fiber.Ctx) error {
 	if err := store.CreateNote(note); err != nil {
 		return fiber.ErrInternalServerError
 	}
+	go func() {
+		if err := ai.PostDoc(note.ExternalID, &ai.Doc{
+			Title:   note.Title,
+			Content: note.Content,
+		}); err != nil {
+			log.Error().Err(err).Send()
+		}
+	}()
 	return c.JSON(&Note{
 		ID: note.ExternalID,
 	})
@@ -195,6 +204,14 @@ func HandleDeleteNote(c *fiber.Ctx) error {
 	if rowsAffected == 0 {
 		return fiber.ErrNotFound
 	}
+	go func() {
+		if err := ai.PostDoc(noteExternalID, &ai.Doc{
+			Title:   "",
+			Content: "",
+		}); err != nil {
+			log.Error().Err(err).Send()
+		}
+	}()
 	return nil
 }
 func HandleUpdateNote(c *fiber.Ctx) error {
@@ -249,5 +266,13 @@ func HandleUpdateNote(c *fiber.Ctx) error {
 	if rowsAffected == 0 {
 		return fiber.ErrNotFound
 	}
+	go func() {
+		if err := ai.PostDoc(noteExternalID, &ai.Doc{
+			Title:   req.Title,
+			Content: req.Content,
+		}); err != nil {
+			log.Error().Err(err).Send()
+		}
+	}()
 	return nil
 }
