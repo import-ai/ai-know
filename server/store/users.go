@@ -12,9 +12,9 @@ func getFirstUser(tx *gorm.DB) (*User, error) {
 	return user, nil
 }
 
-func GetUserByName(uniqueName string) (*User, error) {
+func GetUserByName(name string) (*User, error) {
 	tx := DB()
-	tx = tx.Where("unique_name = ?", uniqueName)
+	tx = tx.Where("name = ?", name)
 	return getFirstUser(tx)
 }
 
