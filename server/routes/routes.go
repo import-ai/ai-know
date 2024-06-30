@@ -2,21 +2,17 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/ycdzj/shuinotes/server/config"
 	"github.com/ycdzj/shuinotes/server/handlers"
 	"github.com/ycdzj/shuinotes/server/middlewares"
 )
 
 func RegisterRoutes(router fiber.Router) {
-	router.Use(middlewares.NewRecover())
+	router.Use(middlewares.NewRecovery())
 
 	router.Post("/login", handlers.HandleLogin)
 	router.Post("/users", handlers.HandleCreateUser)
 
-	router.Use(middlewares.NewJWTAuth(&middlewares.JWTAuthConfig{
-		SecretKey:  config.JWTSecretKey(),
-		CookieName: config.JWTCookieName(),
-	}))
+	router.Use(middlewares.NewJWTAuth())
 
 	prefix := router.Group("/users/:user_name")
 	prefix.Get("", handlers.HandleGetUser)

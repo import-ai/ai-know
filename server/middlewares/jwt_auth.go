@@ -1,48 +1,18 @@
 package middlewares
 
 import (
-	"time"
-
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/rs/zerolog/log"
+	"github.com/ycdzj/shuinotes/server/auth"
+	"github.com/ycdzj/shuinotes/server/config"
 )
 
-type JWTAuthConfig struct {
-	SecretKey  string
-	CookieName string
-}
-
-func NewJWTAuth(cfg *JWTAuthConfig) fiber.Handler {
+func NewJWTAuth() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		tokenStr := c.Cookies(cfg.CookieName)
-		if tokenStr == "" {
-			return fiber.ErrUnauthorized
-		}
-
-		token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
-			return []byte(cfg.SecretKey), nil
-		})
-		if err != nil {
-			log.Error().Err(err).Send()
-			return fiber.ErrUnauthorized
-		}
-
-		claims, ok := token.Claims.(jwt.MapClaims)
+		tokenStr := c.Cookies(config.JWTCookieName())
+		user, ok := auth.ValidateJWT(tokenStr)
 		if !ok {
 			return fiber.ErrUnauthorized
 		}
-
-		exp, err := claims.GetExpirationTime()
-		if !exp.After(time.Now()) {
-			return fiber.ErrUnauthorized
-		}
-
-		user, ok := claims["user"].(string)
-		if !ok {
-			return fiber.ErrUnauthorized
-		}
-
 		c.Locals("user", user)
 		return c.Next()
 	}
