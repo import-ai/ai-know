@@ -10,6 +10,17 @@ func ListKBs(conds map[string]interface{}) ([]*KB, error) {
 	return kbs, nil
 }
 
+func GetKB(conds map[string]interface{}) (*KB, error) {
+	kbs, err := ListKBs(conds)
+	if err != nil {
+		return nil, err
+	}
+	if len(kbs) == 0 {
+		return nil, nil
+	}
+	return kbs[0], nil
+}
+
 func CreateKB(kb *KB) error {
 	return DB().Create(kb).Error
 }

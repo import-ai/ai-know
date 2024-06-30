@@ -16,10 +16,7 @@ type KB struct {
 func HandleListKBs(c *fiber.Ctx) error {
 	user, err := getAuthorizedUser(c)
 	if err != nil {
-		return fiber.ErrInternalServerError
-	}
-	if user == nil {
-		return fiber.ErrUnauthorized
+		return err
 	}
 
 	kbs, err := store.ListKBs(map[string]interface{}{
@@ -43,10 +40,7 @@ func HandleListKBs(c *fiber.Ctx) error {
 func HandleCreateKB(c *fiber.Ctx) error {
 	user, err := getAuthorizedUser(c)
 	if err != nil {
-		return fiber.ErrInternalServerError
-	}
-	if user == nil {
-		return fiber.ErrUnauthorized
+		return err
 	}
 
 	req := &KB{}
@@ -76,10 +70,7 @@ func HandleCreateKB(c *fiber.Ctx) error {
 func HandleDeleteKB(c *fiber.Ctx) error {
 	user, err := getAuthorizedUser(c)
 	if err != nil {
-		return fiber.ErrInternalServerError
-	}
-	if user == nil {
-		return fiber.ErrUnauthorized
+		return err
 	}
 
 	kbExternalID := c.Params("kb_id")
@@ -103,10 +94,7 @@ func HandleDeleteKB(c *fiber.Ctx) error {
 func HandleUpdateKB(c *fiber.Ctx) error {
 	user, err := getAuthorizedUser(c)
 	if err != nil {
-		return fiber.ErrInternalServerError
-	}
-	if user == nil {
-		return fiber.ErrUnauthorized
+		return err
 	}
 
 	kbExternalID := c.Params("kb_id")
@@ -152,10 +140,7 @@ func HandleUpdateKB(c *fiber.Ctx) error {
 func HandleGetKB(c *fiber.Ctx) error {
 	user, err := getAuthorizedUser(c)
 	if err != nil {
-		return fiber.ErrInternalServerError
-	}
-	if user == nil {
-		return fiber.ErrUnauthorized
+		return err
 	}
 
 	kbExternalID := c.Params("kb_id")

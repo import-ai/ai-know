@@ -103,11 +103,14 @@ func HandleCreateUser(c *fiber.Ctx) error {
 func getAuthorizedUser(c *fiber.Ctx) (*store.User, error) {
 	userName, ok := c.Locals("user").(string)
 	if !ok || userName == "" {
-		return nil, nil
+		return nil, fiber.ErrUnauthorized
 	}
 	user, err := store.GetUserByName(userName)
 	if err != nil {
-		return nil, err
+		return nil, fiber.ErrInternalServerError
+	}
+	if user == nil {
+		return nil, fiber.ErrUnauthorized
 	}
 	return user, nil
 }
