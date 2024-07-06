@@ -14,9 +14,9 @@ type KB struct {
 }
 
 func HandleListKBs(c *fiber.Ctx) error {
-	user, err := getAuthorizedUser(c)
-	if user == nil {
-		return err
+	user, ok := c.Locals("authorized_user").(*store.User)
+	if !ok {
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 
 	kbs, err := store.ListKBs(map[string]interface{}{
@@ -38,9 +38,9 @@ func HandleListKBs(c *fiber.Ctx) error {
 }
 
 func HandleCreateKB(c *fiber.Ctx) error {
-	user, err := getAuthorizedUser(c)
-	if user == nil {
-		return err
+	user, ok := c.Locals("authorized_user").(*store.User)
+	if !ok {
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 
 	req := &KB{}
@@ -68,9 +68,9 @@ func HandleCreateKB(c *fiber.Ctx) error {
 }
 
 func HandleDeleteKB(c *fiber.Ctx) error {
-	user, err := getAuthorizedUser(c)
-	if user == nil {
-		return err
+	user, ok := c.Locals("authorized_user").(*store.User)
+	if !ok {
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 
 	kbExternalID := c.Params("kb_id")
@@ -92,9 +92,9 @@ func HandleDeleteKB(c *fiber.Ctx) error {
 }
 
 func HandleUpdateKB(c *fiber.Ctx) error {
-	user, err := getAuthorizedUser(c)
-	if user == nil {
-		return err
+	user, ok := c.Locals("authorized_user").(*store.User)
+	if !ok {
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 
 	kbExternalID := c.Params("kb_id")
@@ -138,9 +138,9 @@ func HandleUpdateKB(c *fiber.Ctx) error {
 }
 
 func HandleGetKB(c *fiber.Ctx) error {
-	user, err := getAuthorizedUser(c)
-	if user == nil {
-		return err
+	user, ok := c.Locals("authorized_user").(*store.User)
+	if !ok {
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 
 	kbExternalID := c.Params("kb_id")

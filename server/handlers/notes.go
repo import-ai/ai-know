@@ -17,9 +17,9 @@ type Note struct {
 }
 
 func HandleListNotes(c *fiber.Ctx) error {
-	user, err := getAuthorizedUser(c)
-	if user == nil {
-		return err
+	user, ok := c.Locals("authorized_user").(*store.User)
+	if !ok {
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 
 	kbExternalID := c.Params("kb_id")
@@ -59,9 +59,9 @@ func HandleListNotes(c *fiber.Ctx) error {
 }
 
 func HandleGetNote(c *fiber.Ctx) error {
-	user, err := getAuthorizedUser(c)
-	if user == nil {
-		return err
+	user, ok := c.Locals("authorized_user").(*store.User)
+	if !ok {
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 
 	kbExternalID := c.Params("kb_id")
@@ -103,9 +103,9 @@ func HandleGetNote(c *fiber.Ctx) error {
 }
 
 func HandleCreateNote(c *fiber.Ctx) error {
-	user, err := getAuthorizedUser(c)
-	if user == nil {
-		return err
+	user, ok := c.Locals("authorized_user").(*store.User)
+	if !ok {
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 
 	kbExternalID := c.Params("kb_id")
@@ -169,9 +169,9 @@ func HandleCreateNote(c *fiber.Ctx) error {
 }
 
 func HandleDeleteNote(c *fiber.Ctx) error {
-	user, err := getAuthorizedUser(c)
-	if user == nil {
-		return err
+	user, ok := c.Locals("authorized_user").(*store.User)
+	if !ok {
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 
 	kbExternalID := c.Params("kb_id")
@@ -215,9 +215,9 @@ func HandleDeleteNote(c *fiber.Ctx) error {
 	return nil
 }
 func HandleUpdateNote(c *fiber.Ctx) error {
-	user, err := getAuthorizedUser(c)
-	if user == nil {
-		return err
+	user, ok := c.Locals("authorized_user").(*store.User)
+	if !ok {
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 
 	kbExternalID := c.Params("kb_id")

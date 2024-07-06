@@ -46,11 +46,8 @@ func HandleLogin(c *fiber.Ctx) error {
 		log.Error().Err(err).Send()
 		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
-	if storedUser == nil {
-		return utils.MakeErrorResp(c, fiber.StatusUnprocessableEntity, "User not exist")
-	}
-	if !bytes.Equal(storedUser.PasswordHash, req.PasswordHash()) {
-		return utils.MakeErrorResp(c, fiber.StatusUnprocessableEntity, "Incorrect password")
+	if storedUser == nil || !bytes.Equal(storedUser.PasswordHash, req.PasswordHash()) {
+		return utils.MakeErrorResp(c, fiber.StatusUnprocessableEntity, "Incorrect username or password")
 	}
 
 	expireTime := time.Now().Add(time.Hour * 24)
@@ -68,18 +65,22 @@ func HandleLogin(c *fiber.Ctx) error {
 	})
 }
 
-func HandleGetUser(c *fiber.Ctx) error {
-	authUser, ok := c.Locals("user").(string)
+func HandleLogout(c *fiber.Ctx) error {
+	c.Cookie(&fiber.Cookie{
+		Name:  config.JWTCookieName(),
+		Value: "",
+	})
+	return utils.MakeOKResp(c, &User{})
+}
+
+func HandleGetAuthorizedUser(c *fiber.Ctx) error {
+	user, ok := c.Locals("authorized_user").(*store.User)
 	if !ok {
 		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 
-	if c.Params("user_name") != authUser {
-		return utils.MakeErrorResp(c, fiber.StatusNotFound, "Not found")
-	}
-
 	return utils.MakeOKResp(c, &User{
-		Name: authUser,
+		Name: user.Name,
 	})
 }
 
@@ -93,7 +94,7 @@ func HandleRegister(c *fiber.Ctx) error {
 		log.Error().Err(err).Send()
 		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	} else if storedUser != nil {
-		return fiber.ErrUnprocessableEntity
+		return utils.MakeErrorResp(c, fiber.StatusUnprocessableEntity, "User already exists")
 	}
 
 	if err := store.CreateUser(&store.User{
@@ -107,20 +108,4 @@ func HandleRegister(c *fiber.Ctx) error {
 	return utils.MakeOKResp(c, &User{
 		Name: req.Name,
 	})
-}
-
-func getAuthorizedUser(c *fiber.Ctx) (*store.User, error) {
-	userName, ok := c.Locals("user").(string)
-	if !ok || userName == "" {
-		return nil, utils.MakeErrorResp(c, fiber.StatusUnauthorized, "Not logged in")
-	}
-	user, err := store.GetUserByName(userName)
-	if err != nil {
-		log.Error().Err(err).Send()
-		return nil, utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
-	}
-	if user == nil {
-		return nil, utils.MakeErrorResp(c, fiber.StatusUnauthorized, "Not logged in")
-	}
-	return user, nil
 }

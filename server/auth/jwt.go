@@ -46,7 +46,7 @@ func ValidateJWT(tokenStr string) (string, bool) {
 	}
 
 	user, ok := claims["user"].(string)
-	if !ok {
+	if !ok || user == "" {
 		return "", false
 	}
 

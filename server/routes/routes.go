@@ -12,12 +12,13 @@ func RegisterRoutes(router fiber.Router) {
 	router = router.Group("/api")
 
 	router.Post("/login", handlers.HandleLogin)
+	router.Post("/logout", handlers.HandleLogout)
 	router.Post("/register", handlers.HandleRegister)
 
 	router.Use(middlewares.NewJWTAuth())
 
-	prefix := router.Group("/users/:user_name")
-	prefix.Get("", handlers.HandleGetUser)
+	prefix := router.Group("/user")
+	prefix.Get("", handlers.HandleGetAuthorizedUser)
 
 	prefix = router.Group("/kbs")
 	prefix.Get("", handlers.HandleListKBs)
