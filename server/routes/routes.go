@@ -9,8 +9,10 @@ import (
 func RegisterRoutes(router fiber.Router) {
 	router.Use(middlewares.NewRecovery())
 
+	router = router.Group("/api")
+
 	router.Post("/login", handlers.HandleLogin)
-	router.Post("/users", handlers.HandleCreateUser)
+	router.Post("/register", handlers.HandleRegister)
 
 	router.Use(middlewares.NewJWTAuth())
 

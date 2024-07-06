@@ -18,7 +18,7 @@ type Note struct {
 
 func HandleListNotes(c *fiber.Ctx) error {
 	user, err := getAuthorizedUser(c)
-	if err != nil {
+	if user == nil {
 		return err
 	}
 
@@ -32,7 +32,7 @@ func HandleListNotes(c *fiber.Ctx) error {
 		"external_id":   kbExternalID,
 	})
 	if err != nil {
-		return fiber.ErrInternalServerError
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 	if kb == nil {
 		return fiber.ErrNotFound
@@ -43,7 +43,7 @@ func HandleListNotes(c *fiber.Ctx) error {
 		"parent_note_id": 0,
 	})
 	if err != nil {
-		return fiber.ErrInternalServerError
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 
 	respNotes := []*Note{}
@@ -60,7 +60,7 @@ func HandleListNotes(c *fiber.Ctx) error {
 
 func HandleGetNote(c *fiber.Ctx) error {
 	user, err := getAuthorizedUser(c)
-	if err != nil {
+	if user == nil {
 		return err
 	}
 
@@ -78,7 +78,7 @@ func HandleGetNote(c *fiber.Ctx) error {
 		"external_id":   kbExternalID,
 	})
 	if err != nil {
-		return fiber.ErrInternalServerError
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 	if kb == nil {
 		return fiber.ErrNotFound
@@ -89,7 +89,7 @@ func HandleGetNote(c *fiber.Ctx) error {
 		"external_id": noteExternalID,
 	})
 	if err != nil {
-		return fiber.ErrInternalServerError
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 	if note == nil {
 		return fiber.ErrNotFound
@@ -104,7 +104,7 @@ func HandleGetNote(c *fiber.Ctx) error {
 
 func HandleCreateNote(c *fiber.Ctx) error {
 	user, err := getAuthorizedUser(c)
-	if err != nil {
+	if user == nil {
 		return err
 	}
 
@@ -126,7 +126,7 @@ func HandleCreateNote(c *fiber.Ctx) error {
 		"external_id":   kbExternalID,
 	})
 	if err != nil {
-		return fiber.ErrInternalServerError
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 	if kb == nil {
 		return fiber.ErrNotFound
@@ -144,7 +144,7 @@ func HandleCreateNote(c *fiber.Ctx) error {
 			"external_id": req.ParentID,
 		})
 		if err != nil {
-			return fiber.ErrInternalServerError
+			return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 		}
 		if parentNote == nil {
 			return fiber.ErrUnprocessableEntity
@@ -153,7 +153,7 @@ func HandleCreateNote(c *fiber.Ctx) error {
 	}
 
 	if err := store.CreateNote(note); err != nil {
-		return fiber.ErrInternalServerError
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 	go func() {
 		if err := ai.PostDoc(note.ExternalID, &ai.Doc{
@@ -170,7 +170,7 @@ func HandleCreateNote(c *fiber.Ctx) error {
 
 func HandleDeleteNote(c *fiber.Ctx) error {
 	user, err := getAuthorizedUser(c)
-	if err != nil {
+	if user == nil {
 		return err
 	}
 
@@ -188,7 +188,7 @@ func HandleDeleteNote(c *fiber.Ctx) error {
 		"external_id":   kbExternalID,
 	})
 	if err != nil {
-		return fiber.ErrInternalServerError
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 	if kb == nil {
 		return fiber.ErrNotFound
@@ -199,7 +199,7 @@ func HandleDeleteNote(c *fiber.Ctx) error {
 		"external_id": noteExternalID,
 	})
 	if err != nil {
-		return fiber.ErrInternalServerError
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 	if rowsAffected == 0 {
 		return fiber.ErrNotFound
@@ -216,7 +216,7 @@ func HandleDeleteNote(c *fiber.Ctx) error {
 }
 func HandleUpdateNote(c *fiber.Ctx) error {
 	user, err := getAuthorizedUser(c)
-	if err != nil {
+	if user == nil {
 		return err
 	}
 
@@ -245,7 +245,7 @@ func HandleUpdateNote(c *fiber.Ctx) error {
 		"external_id":   kbExternalID,
 	})
 	if err != nil {
-		return fiber.ErrInternalServerError
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 	if kb == nil {
 		return fiber.ErrNotFound
@@ -261,7 +261,7 @@ func HandleUpdateNote(c *fiber.Ctx) error {
 	}
 	rowsAffected, err := store.UpdateNote(conds, fields)
 	if err != nil {
-		return fiber.ErrInternalServerError
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 	if rowsAffected == 0 {
 		return fiber.ErrNotFound

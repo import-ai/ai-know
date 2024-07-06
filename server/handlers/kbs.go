@@ -15,7 +15,7 @@ type KB struct {
 
 func HandleListKBs(c *fiber.Ctx) error {
 	user, err := getAuthorizedUser(c)
-	if err != nil {
+	if user == nil {
 		return err
 	}
 
@@ -23,7 +23,7 @@ func HandleListKBs(c *fiber.Ctx) error {
 		"owner_user_id": user.ID,
 	})
 	if err != nil {
-		return fiber.ErrInternalServerError
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 
 	respKBs := []*KB{}
@@ -39,7 +39,7 @@ func HandleListKBs(c *fiber.Ctx) error {
 
 func HandleCreateKB(c *fiber.Ctx) error {
 	user, err := getAuthorizedUser(c)
-	if err != nil {
+	if user == nil {
 		return err
 	}
 
@@ -58,7 +58,7 @@ func HandleCreateKB(c *fiber.Ctx) error {
 		Title:       req.Title,
 	}
 	if err := store.CreateKB(storedKB); err != nil {
-		return fiber.ErrInternalServerError
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 	return c.JSON(&KB{
 		ID:    storedKB.ExternalID,
@@ -69,7 +69,7 @@ func HandleCreateKB(c *fiber.Ctx) error {
 
 func HandleDeleteKB(c *fiber.Ctx) error {
 	user, err := getAuthorizedUser(c)
-	if err != nil {
+	if user == nil {
 		return err
 	}
 
@@ -83,7 +83,7 @@ func HandleDeleteKB(c *fiber.Ctx) error {
 		"external_id":   kbExternalID,
 	})
 	if err != nil {
-		return fiber.ErrInternalServerError
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 	if rowsAffected == 0 {
 		return fiber.ErrNotFound
@@ -93,7 +93,7 @@ func HandleDeleteKB(c *fiber.Ctx) error {
 
 func HandleUpdateKB(c *fiber.Ctx) error {
 	user, err := getAuthorizedUser(c)
-	if err != nil {
+	if user == nil {
 		return err
 	}
 
@@ -129,7 +129,7 @@ func HandleUpdateKB(c *fiber.Ctx) error {
 	}
 	rowsAffected, err := store.UpdateKB(conds, fields)
 	if err != nil {
-		return fiber.ErrInternalServerError
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 	if rowsAffected == 0 {
 		return fiber.ErrNotFound
@@ -139,7 +139,7 @@ func HandleUpdateKB(c *fiber.Ctx) error {
 
 func HandleGetKB(c *fiber.Ctx) error {
 	user, err := getAuthorizedUser(c)
-	if err != nil {
+	if user == nil {
 		return err
 	}
 
@@ -153,7 +153,7 @@ func HandleGetKB(c *fiber.Ctx) error {
 		"external_id":   kbExternalID,
 	})
 	if err != nil {
-		return fiber.ErrInternalServerError
+		return utils.MakeErrorResp(c, fiber.StatusInternalServerError, "")
 	}
 
 	if len(kbs) == 0 {
