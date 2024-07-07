@@ -6,13 +6,28 @@ const props = defineProps({
 })
 const emit = defineEmits(['kbSelected', 'createKbClicked', 'logoutClicked'])
 
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 
 const isDropdownOpen = ref(false);
 
 function toggleDropdown() {
   isDropdownOpen.value = !isDropdownOpen.value
 }
+
+function handleClickOutside(event) {
+  const dropdown = document.querySelector('.dropdown');
+  if (dropdown && !dropdown.contains(event.target)) {
+    isDropdownOpen.value = false;
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
 
 function handleDropdownButtonClick() {
   toggleDropdown()
@@ -35,7 +50,7 @@ function handleDropdownItemSelect(kb) {
           Knowledge Base: {{ props.curKb.name }}
           <span class="ml-2 arrow"></span>
         </button>
-        <div v-if="isDropdownOpen" class="dropdown-content absolute mt-2 w-48 rounded shadow-lg bg-white text-gray-800">
+        <div v-if="isDropdownOpen" class="dropdown-content absolute mt-1 w-48 rounded shadow-lg bg-white text-gray-800">
           <a href="#" v-for="kb in props.kbs" :key="kb.id" @click.prevent="handleDropdownItemSelect(kb)"
             class="block px-4 py-2 hover:bg-gray-100">
             {{ kb.name }}
