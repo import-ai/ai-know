@@ -46,10 +46,13 @@ func HandleCreateKB(c *fiber.Ctx) error {
 	req := &KB{}
 	if err := c.BodyParser(req); err != nil {
 		log.Error().Err(err).Send()
-		return fiber.ErrBadRequest
+		return utils.MakeErrorResp(c, fiber.StatusBadRequest, "Not a valid json")
 	}
-	if req.Owner != user.Name {
-		return fiber.ErrUnprocessableEntity
+	if req.Title == "" {
+		return utils.MakeErrorResp(c, fiber.StatusBadRequest, "Empty title")
+	}
+	if req.Owner != "" && req.Owner != user.Name {
+		return utils.MakeErrorResp(c, fiber.StatusUnprocessableEntity, "Cannot create KB owned by others")
 	}
 
 	storedKB := &store.KB{
@@ -75,7 +78,7 @@ func HandleDeleteKB(c *fiber.Ctx) error {
 
 	kbExternalID := c.Params("kb_id")
 	if kbExternalID == "" {
-		return fiber.ErrBadRequest
+		return utils.MakeErrorResp(c, fiber.StatusBadRequest, "Empty kb_id")
 	}
 
 	rowsAffected, err := store.DeleteKB(map[string]interface{}{
@@ -99,13 +102,13 @@ func HandleUpdateKB(c *fiber.Ctx) error {
 
 	kbExternalID := c.Params("kb_id")
 	if kbExternalID == "" {
-		return fiber.ErrBadRequest
+		return utils.MakeErrorResp(c, fiber.StatusBadRequest, "Empty kb_id")
 	}
 
 	req := &KB{}
 	if err := c.BodyParser(req); err != nil {
 		log.Error().Err(err).Send()
-		return fiber.ErrBadRequest
+		return utils.MakeErrorResp(c, fiber.StatusBadRequest, "Not a valid json")
 	}
 
 	if req.ID != "" && req.ID != kbExternalID {
@@ -145,7 +148,7 @@ func HandleGetKB(c *fiber.Ctx) error {
 
 	kbExternalID := c.Params("kb_id")
 	if kbExternalID == "" {
-		return fiber.ErrBadRequest
+		return utils.MakeErrorResp(c, fiber.StatusBadRequest, "Empty kb_id")
 	}
 
 	kbs, err := store.ListKBs(map[string]interface{}{
