@@ -23,6 +23,18 @@ export class APIClient {
     const resp = await this.http_client.get('/user')
     return resp.name
   }
+
+  async logout() {
+    await this.http_client.post('/logout', {})
+  }
+
+  async listKbs() {
+    return await this.http_client.get('/kbs')
+  }
+
+  async createKb(kb) {
+    return await this.http_client.post('/kbs', kb)
+  }
 }
 
 export const api_client = new APIClient('http://localhost/api')

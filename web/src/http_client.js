@@ -25,11 +25,11 @@ export class HTTPClient {
     }
 
     const resp = await fetch(`${this.baseURL}${endpoint}`, config);
-    const resp_json = await resp.json()
+    const respJson = await resp.json()
     if (!resp.ok) {
-      throw new HTTPError(resp.status, resp_json)
+      throw new HTTPError(resp.status, respJson)
     }
-    return resp_json
+    return respJson
   }
 
   async get(endpoint, headers = {}) {
