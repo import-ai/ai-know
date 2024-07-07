@@ -35,6 +35,18 @@ export class APIClient {
   async createKb(kb) {
     return await this.http_client.post('/kbs', kb)
   }
+
+  async listNotes(kb_id) {
+    return await this.http_client.get(`/kbs/${kb_id}/notes`)
+  }
+
+  async createNote(kb_id, note) {
+    return await this.http_client.post(`/kbs/${kb_id}/notes`, note)
+  }
+
+  async updateNote(kb_id, note) {
+    return await this.http_client.put(`/kbs/${kb_id}/notes/${note.id}`, note)
+  }
 }
 
-export const api_client = new APIClient('http://localhost/api')
+export const api_client = new APIClient('/api')

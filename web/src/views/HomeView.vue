@@ -6,6 +6,7 @@ import { HTTPError } from '@/http_client'
 import { api_client } from '@/api_client'
 import NavBar from '@/components/NavBar.vue'
 import CreateKbModal from '@/components/CreateKbModal.vue'
+import NoteEditor from '@/components/NoteEditor.vue'
 
 const router = useRouter();
 
@@ -18,6 +19,10 @@ onMounted(async () => {
   try {
     authorizedUser.value = await api_client.getAuthorizedUser()
     await refreshKbs()
+    if (kbs.value.length == 0) {
+      await api_client.createKb({ title: 'Default KB' })
+      await refreshKbs()
+    }
   } catch (err) {
     if (err instanceof HTTPError && err.status == 401) {
       router.push('login')
@@ -64,6 +69,12 @@ function handleModalClose() {
 
 <template>
   <NavBar :kbs="kbs" :cur-kb="curKb" :user-name="authorizedUser" @kb-selected="handleKbSelected"
-    @logout-clicked="handleLogout" @create-kb-clicked="handleCreateKbClicked"></NavBar>
-  <CreateKbModal :is-open="isModalOpen" @submit="handleModalSubmit" @close="handleModalClose"></CreateKbModal>
+    @logout-clicked="handleLogout" @create-kb-clicked="handleCreateKbClicked">
+  </NavBar>
+  <div class="h-[calc(100vh-56px)] p-4">
+    <NoteEditor :kb="curKb" />
+  </div>
+  <CreateKbModal :is-open="isModalOpen" @submit="handleModalSubmit" @close="handleModalClose" />
 </template>
+
+<style scoped></style>
