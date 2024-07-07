@@ -1,36 +1,53 @@
 services:
+  ai_backend:
+    build: ./ai
+    volumes:
+      - ./ai:/app
+      - /etc/localtime:/etc/localtime:ro
+      - ./ai/cache:/root/.cache/
+    env_file:
+      - ./ai/.env
+    working_dir: /app
+    restart: always
+    entrypoint: python3 main.py
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:${PORT}/api/health || exit 1"]
+
   postgres_db:
     image: postgres:16
     environment:
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
       POSTGRES_DB: mydatabase
-    # ports:
-    #   - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always
-  server:
+
+  api_backend:
     depends_on:
       - postgres_db
     build: ./server
     environment:
-      DB_DSN: "host=postgres_db user=myuser password=mypassword dbname=mydatabase port=5432 sslmode=disable TimeZone=Asia/Shanghai"
       API_LISTEN_ADDR: "0.0.0.0:5433"
-    # ports:
-    #   - "127.0.0.1:5433:5433"
+      API_DATA_SOURCE_NAME: 'host=postgres_db user=myuser password=mypassword dbname=mydatabase port=5432 sslmode=disable TimeZone=Asia/Shanghai'
+      API_JWT_SECRET_KEY: 123
+      API_AI_SERVER_ADDR: "http://ai_backend:8911"
     restart: always
+
   web:
-    depends_on:
-      - server
     build: ./web
-    environment:
-      SERVER_ADDR: "http://server:5433"
-      PORT: 3000
-      HOSTNAME: "0.0.0.0"
-    ports:
-      - "3000:3000"
     restart: always
+
+  nginx:
+    image: nginx:1.27
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api_backend
+      - web
+    restart: always
+    ports:
+      - 80:80
 
 volumes:
   postgres_data:
