@@ -1,7 +1,7 @@
 <script setup>
 const props = defineProps(['kb'])
 
-import { onMounted, ref, watchEffect } from 'vue';
+import { ref, watchEffect } from 'vue';
 
 import { api_client } from '@/api_client'
 
@@ -10,15 +10,18 @@ const curNote = ref(null)
 const editorTitle = ref('')
 const editorContent = ref('')
 
-onMounted(async () => {
-  await refreshNotes()
-})
-
 watchEffect(async () => {
   if (props.kb) {
     notes.value = await api_client.listNotes(props.kb.id)
+    if (notes.value.length > 0) {
+      curNote.value = notes.value[0]
+    } else {
+      await createNewNote()
+    }
+  } else {
+    notes.value = []
+    curNote.value = null
   }
-  curNote.value = null
 })
 
 watchEffect(() => {
@@ -32,7 +35,7 @@ watchEffect(() => {
 })
 
 async function createNewNote() {
-  const newNote = await api_client.createNote(props.kb.id, { title: editorTitle.value, content: editorContent.value })
+  const newNote = await api_client.createNote(props.kb.id, {})
   notes.value = await api_client.listNotes(props.kb.id)
   for (const note of notes.value) {
     if (note.id == newNote.id) {
@@ -82,7 +85,7 @@ async function handleInput() {
       </div>
       <ul v-else class="flex-1">
         <li v-for="note in notes" :key="note.id" :class="{
-          'p-2 m-2 bg-white border border-gray-300 cursor-pointer': true,
+          'p-2 m-2 border border-gray-300 cursor-pointer': true,
           'bg-blue-100': curNote && note.id === curNote.id
         }" @click="handleNoteSelect(note)">
           <h3 class="font-bold">{{ beautifyTitle(note.title) }}</h3>
