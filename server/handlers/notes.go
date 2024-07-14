@@ -274,5 +274,5 @@ func HandleUpdateNote(c *fiber.Ctx) error {
 			log.Error().Err(err).Send()
 		}
 	}()
-	return nil
+	return utils.MakeOKResp(c, &Note{ID: noteExternalID})
 }

@@ -2,13 +2,17 @@
 const props = defineProps(['kb'])
 
 import { ref, watchEffect } from 'vue';
+import { useToast } from "vue-toastification";
 
 import { api_client } from '@/api_client'
+
+const toast = useToast()
 
 const notes = ref([])
 const curNote = ref(null)
 const editorTitle = ref('')
 const editorContent = ref('')
+const edited = ref(false)
 
 watchEffect(async () => {
   if (props.kb) {
@@ -32,6 +36,7 @@ watchEffect(() => {
     editorTitle.value = ''
     editorContent.value = ''
   }
+  edited.value = false
 })
 
 async function createNewNote() {
@@ -58,17 +63,28 @@ function beautifyTitle(title) {
 }
 
 function handleNoteSelect(note) {
+  if (edited.value) {
+    toast('Save first')
+    return
+  }
   curNote.value = note
 }
 
 async function handleInput() {
+  edited.value = true
+}
+
+async function saveCurNote() {
   if (!curNote.value) {
-    await createNewNote()
     return
   }
-  curNote.value.title = editorTitle.value
-  curNote.value.content = editorContent.value
-  await api_client.updateNote(props.kb.id, curNote.value)
+  if (edited.value) {
+    curNote.value.title = editorTitle.value
+    curNote.value.content = editorContent.value
+    await api_client.updateNote(props.kb.id, curNote.value)
+    edited.value = false
+    toast('Saved')
+  }
 }
 
 </script>
@@ -98,6 +114,10 @@ async function handleInput() {
         placeholder="Title" />
       <textarea class="w-full h-full p-2 border border-gray-300 rounded" v-model="editorContent" @input="handleInput"
         placeholder="Start typing..." />
+      <button @click="saveCurNote"
+        class="w-full my-1 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75">
+        Save
+      </button>
     </div>
   </div>
 </template>
