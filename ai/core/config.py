@@ -19,6 +19,7 @@ class Config(BaseModel):
     openai_base_url: str = Field(default="https://api.openai.com/v1")
 
     embedding_model_name_or_path: str = Field(default="BAAI/bge-m3")
+    embedding_batch_size: int = Field(default=1)
     device: str = Field(default="cpu")
 
     data_dir: str = Field(default="chroma_data")
