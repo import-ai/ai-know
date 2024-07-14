@@ -40,3 +40,4 @@ next-env.d.ts
 .vscode
 
 /ai/cache
+/postgres_data

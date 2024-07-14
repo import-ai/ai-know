@@ -22,7 +22,7 @@ services:
       POSTGRES_PASSWORD: mypassword
       POSTGRES_DB: mydatabase
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./postgres_data:/var/lib/postgresql/data
     restart: always
 
   api_backend:
@@ -51,5 +51,5 @@ services:
     ports:
       - 8911:80
 
-volumes:
-  postgres_data:
+# volumes:
+#   postgres_data:
