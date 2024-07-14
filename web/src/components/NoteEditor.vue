@@ -40,6 +40,10 @@ watchEffect(() => {
 })
 
 async function createNewNote() {
+  if (edited.value) {
+    toast('Save first')
+    return
+  }
   const newNote = await api_client.createNote(props.kb.id, {})
   notes.value = await api_client.listNotes(props.kb.id)
   for (const note of notes.value) {
