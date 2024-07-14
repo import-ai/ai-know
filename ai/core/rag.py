@@ -1,10 +1,11 @@
 from functools import partial
-from typing import List, Dict, Any
+from typing import List
 
 from openai import OpenAI
 
 from core.config import config
 from core.entity import Retrieval, Chunk
+from datetime import datetime
 
 
 class RAG:
@@ -12,7 +13,7 @@ class RAG:
     def __init__(self):
         self.client = OpenAI(api_key=config.openai_api_key, base_url=config.openai_base_url)
         self._chat = partial(self.client.chat.completions.create, model=config.openai_model)
-        with open('resource/prompt.txt') as f:
+        with open("resource/prompt.md") as f:
             self.prompt: str = f.read()
 
     @classmethod
@@ -30,7 +31,10 @@ class RAG:
     def messages_prepare(self, query: str, template: str, retrieval_list: List[Retrieval]) -> List[dict]:
         context = self.build_context(retrieval_list)
         messages = [
-            {"role": "system", "content": template.format_map({"context": context})},
+            {"role": "system", "content": template.format_map({
+                "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "context": context
+            })},
             {"role": "user", "content": query}
         ]
         return messages

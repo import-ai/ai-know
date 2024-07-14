@@ -1,5 +1,7 @@
+import os
 from contextlib import asynccontextmanager
 import json
+from datetime import datetime
 from functools import partial
 from typing import List, Iterator
 from sse_starlette import EventSourceResponse
@@ -7,7 +9,7 @@ from sse_starlette import EventSourceResponse
 import uvicorn
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse, Response, HTMLResponse
 from pydantic import BaseModel, Field
 
 from core.config import load_config, Config
@@ -19,6 +21,9 @@ from core.rag import RAG
 
 dumps = partial(json.dumps, ensure_ascii=False, separators=(",", ":"))
 
+with open("resource/index.html") as f:
+    chat_html: str = f.read()
+start_time: datetime = datetime.now()
 config: Config = load_config()
 logger = get_logger(__name__)
 embedding: Embedding = ...
@@ -44,7 +49,7 @@ async def lifespan(_: FastAPI):
     del embedding, rag
 
 
-app = FastAPI(lifespan=lifespan, title="AI Knowledge", version="0.0.1", description="")
+app = FastAPI(lifespan=lifespan, title="AI Know", description="")
 
 app.add_middleware(
     CORSMiddleware,
@@ -68,6 +73,7 @@ async def exception_handler(_: Request, e: Exception) -> Response:
 
 @app.put("/api/index/{doc_id}", response_model=None)
 async def create_or_update(doc_id: str, request: InsertRequest):
+    embedding.remove(doc_id)
     chunk_list: List[Chunk] = split_markdown(doc_id, request.title, request.content)
     embedding.insert(chunk_list)
 
@@ -79,22 +85,43 @@ async def recall(query: str, k: int):
 
 
 def stream_chat(query: str) -> Iterator[str]:
-    retrieval_list: List[Retrieval] = embedding.query(query, 30)
-    for delta in rag.chat(query, retrieval_list):  # TODO Add rerank
-        yield dumps({"response_type": "delta", "content": delta})
-    yield dumps({"response_type": "citation", "content": [r.chunk.model_dump() for r in retrieval_list]})
+    try:
+        retrieval_list: List[Retrieval] = embedding.query(query, 10)
+
+        doc_id_list = []
+        for retrieval in retrieval_list:
+            if retrieval.chunk.doc_id not in doc_id_list:
+                doc_id_list.append(retrieval.chunk.doc_id)
+
+        for delta in rag.chat(query, retrieval_list):  # TODO Add rerank
+            yield dumps({"response_type": "delta", "content": delta})
+        yield dumps({"response_type": "citation", "content": [r.chunk.model_dump() for r in retrieval_list]})
+    except Exception as e:
+        yield dumps({
+            "response_type": "error",
+            "exception_class": e.__class__.__name__,
+            "exception_message": str(e)
+        })
     yield '[DONE]'
 
 
-@app.post("/api/chat")
+@app.get("/api/chat")
 async def api_chat(query: str):
     return EventSourceResponse(stream_chat(query))
+
+
+@app.get("/", response_class=HTMLResponse)
+async def index():
+    return HTMLResponse(content=chat_html, status_code=200)
 
 
 # healthcheck
 @app.get("/api/health")
 async def healthcheck():
-    return {"status": 200}
+    return {
+        "status": 200,
+        "uptime": str(datetime.now() - start_time)
+    }
 
 
 def main():

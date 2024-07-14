@@ -22,6 +22,9 @@ class Embedding:
             metadatas=[c.metadata for c in chunk_list]
         )
 
+    def remove(self, doc_id: str):
+        self.collection.delete(where={"doc_id": doc_id})
+
     def query(self, query: str, k: int) -> List[Retrieval]:
         batch_result_list: chromadb.QueryResult = self.collection.query(query_texts=[query], n_results=k)
         result_list: List[Retrieval] = []

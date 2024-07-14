@@ -23,8 +23,15 @@ def db(tmp_path: pathlib.Path) -> Embedding:
     ("bike", 3, 0, "car", "a"),
     ("chunk_type", 3, 0, "snake", "b")
 ])
-def test_db(db: Embedding, query: str, k: int, rank: int, expected_text: str, expected_doc_id: str):
+def test_db_query(db: Embedding, query: str, k: int, rank: int, expected_text: str, expected_doc_id: str):
     result_list: List[Retrieval] = db.query(query, k)
     assert len(result_list) == k
     assert result_list[rank].chunk.text == expected_text
     assert result_list[rank].chunk.doc_id == expected_doc_id
+
+
+@pytest.mark.parametrize("doc_id, expected_count", [("a", 1), ("b", 2)])
+def test_db_remove(db: Embedding, doc_id: str, expected_count: int):
+    assert db.collection.count() == 3
+    db.remove(doc_id)
+    assert db.collection.count() == expected_count
