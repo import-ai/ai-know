@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Know</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        #content {
+            align-items: center;
+            justify-content: center;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+<h1>AI Know</h1>
+<div>
+    <form id="search-form" action="#">
+        <label>
+            Query:
+            <input type="text" id="query">
+        </label>
+        <input type="submit" value="Submit">
+    </form>
+</div>
+<div id="info"></div>
+
+<div class="container">
+    <div id="content"></div>
+</div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+<script>
+    function aLink(title, link) {
+        return `<a href="${link}" target="_blank">${title}</a>`
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const md = window.markdownit({
+            html: true
+        });
+        const content = document.getElementById("content");
+        const info = document.getElementById("info");
+
+        document.getElementById("search-form").onsubmit = function (e) {
+            e.preventDefault();
+
+            content.innerHTML = "";
+            info.innerHTML = "";
+
+            if (typeof (EventSource) !== "undefined") {
+                let params = new URLSearchParams({
+                    "query": document.getElementById("query").value
+                });
+                const eventSource = new EventSource(`/api/chat?${params.toString()}`);
+                let citationList = [];
+                let response = "";
+
+                function replace_citation(text) {
+                    for (const citation of citationList) {
+                        let citeId = `[${citation["i"]}]`
+                        text = text.replace(`[${citeId}]`, aLink(citeId, citation["link"]));
+                    }
+                    return text
+                }
+
+                eventSource.onmessage = function (event) {
+                    if (event.data === "[DONE]") {
+                        eventSource.close();
+                        return;
+                    }
+                    let sseBody = JSON.parse(event.data);
+                    let responseType = sseBody["response_type"];
+                    if (responseType === "error") {
+                        eventSource.close();
+                        let message = sseBody["exception_message"];
+                        info.innerHTML = `error: ${message}`;
+                    } else if (responseType === "delta") {
+                        let delta = sseBody["content"];
+                        response += delta;
+                        content.innerHTML = md.render(response);
+                    } else if (responseType === "citation") {
+                        let strCitationList = []
+                        for (let i = 0; i < sseBody["content"].length; i++) {
+                            let citation = sseBody["content"][i];
+                            let strCitation = `${i + 1}. ${citation["doc_id"]}:${citation["start_lineno"]}-${citation["end_lineno"]}`;
+                            strCitationList.push(strCitation);
+                        }
+
+                        response += "\n\n" + strCitationList.join("\n");
+                        content.innerHTML = md.render(response);
+                    } else {
+                        info.innerHTML = `error: Unknown response type ${responseType}`;
+                    }
+                };
+
+                eventSource.onopen = function () {
+                };
+
+                eventSource.onerror = function (error) {
+                    console.error(error);
+                    eventSource.close();
+                };
+            } else {
+                content.textContent = "Sorry, your browser does not support Server-Sent Events.";
+            }
+        };
+    });
+</script>
+</html>
