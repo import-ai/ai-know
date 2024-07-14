@@ -7,11 +7,13 @@ services:
       - ./ai/cache:/root/.cache/
     env_file:
       - ./ai/.env
+    environment:
+      PORT: 8000
     working_dir: /app
     restart: always
     entrypoint: python3 main.py
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:${PORT}/api/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/health || exit 1"]
 
   postgres_db:
     image: postgres:16
@@ -31,7 +33,7 @@ services:
       API_LISTEN_ADDR: "0.0.0.0:5433"
       API_DATA_SOURCE_NAME: 'host=postgres_db user=myuser password=mypassword dbname=mydatabase port=5432 sslmode=disable TimeZone=Asia/Shanghai'
       API_JWT_SECRET_KEY: 123
-      API_AI_SERVER_ADDR: "http://ai_backend:8911"
+      API_AI_SERVER_ADDR: "http://ai_backend:8000"
     restart: always
 
   web:
@@ -47,7 +49,7 @@ services:
       - web
     restart: always
     ports:
-      - 80:80
+      - 8911:80
 
 volumes:
   postgres_data:
