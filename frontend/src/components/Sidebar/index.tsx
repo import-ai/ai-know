@@ -19,6 +19,12 @@ export const Sidebar = () => {
               <Link to={`/article/${article.id}`}>{article.title}</Link>
             </li>
           ))}
+          <div className="flex-1"></div>
+          <div>
+            {/* debug tool */}
+            <button className="btn">export snap</button>
+            <button className="btn">console markdown</button>
+          </div>
         </ul>
       </div>
     </div>
