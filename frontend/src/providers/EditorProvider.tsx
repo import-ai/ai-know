@@ -3,10 +3,10 @@ import { initEditor } from '@/components/Editor/editor'
 import React from 'react'
 
 export const EditorProvider = ({ children }: { children: React.ReactNode }) => {
-  const { editor, collection } = initEditor()
+  const { editor, collection, renderMarkdown } = initEditor()
 
   return (
-    <EditorContext.Provider value={{ editor, collection }}>
+    <EditorContext.Provider value={{ editor, collection, renderMarkdown }}>
       {children}
     </EditorContext.Provider>
   )

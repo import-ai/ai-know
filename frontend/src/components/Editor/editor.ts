@@ -1,7 +1,7 @@
 import { AffineEditorContainer } from '@blocksuite/presets'
-import { Doc, Schema } from '@blocksuite/store'
+import { Doc, nanoid, Schema } from '@blocksuite/store'
 import { DocCollection } from '@blocksuite/store'
-import { AffineSchemas } from '@blocksuite/blocks'
+import { AffineSchemas, MarkdownTransformer } from '@blocksuite/blocks'
 import '@blocksuite/presets/themes/affine.css'
 
 export interface EditorContextType {
@@ -25,9 +25,38 @@ export function initEditor() {
 
   const editor = new AffineEditorContainer()
   editor.doc = doc
-  editor.slots.docLinkClicked.on(({ docId }) => {
-    const target = <Doc>collection.getDoc(docId)
-    editor.doc = target
-  })
-  return { editor, collection }
+  // editor.slots.docLinkClicked.on(({ docId }) => {
+  //   const target = <Doc>collection.getDoc(docId)
+  //   editor.doc = target
+  // })
+
+  const renderMarkdown = async (
+    id: string,
+    title: string,
+    markdown: string,
+  ) => {
+    const doc = collection.createDoc({ id: nanoid() })
+    editor.doc = doc
+    doc.load()
+    // Add root block and surface block at root level
+    const rootId = doc.addBlock('affine:page', {
+      // title: new Text(title),
+    })
+    doc.addBlock('affine:surface', {}, rootId)
+
+    const noteId = doc.addBlock(
+      'affine:note',
+      { xywh: '[0, 100, 800, 640]' },
+      rootId,
+    )
+
+    await MarkdownTransformer.importMarkdown({
+      doc,
+      noteId,
+      markdown: markdown,
+    })
+
+    doc.resetHistory()
+  }
+  return { editor, collection, renderMarkdown }
 }
