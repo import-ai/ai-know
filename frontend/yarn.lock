@@ -2579,6 +2579,7 @@ __metadata:
     tailwindcss: "npm:^3.4.7"
     typescript: "npm:^5.2.2"
     vite: "npm:^5.3.4"
+    yjs: "npm:^13.6.18"
   languageName: unknown
   linkType: soft
 
@@ -3226,7 +3227,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lib0@npm:^0.2.85, lib0@npm:^0.2.95":
+"lib0@npm:^0.2.85, lib0@npm:^0.2.86, lib0@npm:^0.2.95":
   version: 0.2.95
   resolution: "lib0@npm:0.2.95"
   dependencies:
@@ -5701,6 +5702,15 @@ __metadata:
   bin:
     yaml: bin.mjs
   checksum: 10c0/771a1df083c8217cf04ef49f87244ae2dd7d7457094425e793b8f056159f167602ce172aa32d6bca21f787d24ec724aee3cecde938f6643564117bd151452631
+  languageName: node
+  linkType: hard
+
+"yjs@npm:^13.6.18":
+  version: 13.6.18
+  resolution: "yjs@npm:13.6.18"
+  dependencies:
+    lib0: "npm:^0.2.86"
+  checksum: 10c0/ef886370f5d4ff98491c3612cbd5b4ae3a75d1756aeae98f0a0855f29acf80008f019fe22067fddc447bceacfea00c20f9c3efc0bb7b5cbec62aacb435cb8072
   languageName: node
   linkType: hard
 

@@ -15,7 +15,8 @@
     "@blocksuite/store": "^0.16.0-canary-202408030846-447b5bc",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.26.0"
+    "react-router-dom": "^6.26.0",
+    "yjs": "^13.6.18"
   },
   "devDependencies": {
     "@types/node": "^22.1.0",
