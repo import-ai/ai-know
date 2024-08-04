@@ -10,6 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@blocksuite/blocks": "^0.16.0-canary-202408030846-447b5bc",
+    "@blocksuite/presets": "^0.16.0-canary-202408030846-447b5bc",
+    "@blocksuite/store": "^0.16.0-canary-202408030846-447b5bc",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.0"
