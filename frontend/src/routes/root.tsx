@@ -3,9 +3,9 @@ import { Outlet } from 'react-router-dom'
 
 const App = () => {
   return (
-    <div style={{ display: 'flex' }}>
+    <div className="flex h-[100dvh] w-[100dvw]">
       <Sidebar />
-      <div style={{ flex: 1, padding: '10px' }}>
+      <div className="flex-1">
         <Outlet />
       </div>
     </div>
