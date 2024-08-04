@@ -20,7 +20,11 @@ class Config(BaseModel):
 
     embedding_model_name_or_path: str = Field(default="BAAI/bge-m3")
     embedding_batch_size: int = Field(default=1)
-    device: str = Field(default="cpu")
+    embedding_device: str = Field(default="cpu")
+
+    ranker_model_name_or_path: str = Field(default="BAAI/bge-reranker-v2-m3")
+    ranker_batch_size: int = Field(default=1)
+    ranker_device: str = Field(default="cpu")
 
     data_dir: str = Field(default="chroma_data")
 
@@ -33,11 +37,11 @@ def load_from_config_file(yaml_path: str = "config.yaml") -> Dict[str, str]:
 
 
 def load_from_env() -> Dict[str, str]:
-    config: Dict[str, str] = {}
+    c: Dict[str, str] = {}
 
     for field_name in Config.__fields__.keys():
-        config[field_name] = os.getenv(field_name.upper(), None)
-    return {k: v for k, v in config.items() if v is not None}
+        c[field_name] = os.getenv(field_name.upper(), None)
+    return {k: v for k, v in c.items() if v is not None}
 
 
 def load_from_cli() -> Dict[str, str]:
@@ -51,8 +55,8 @@ def load_from_cli() -> Dict[str, str]:
             help=field.description,
         )
     args, _ = parser.parse_known_args()
-    config = vars(args)
-    return {k: v for k, v in config.items() if v is not None}
+    c = vars(args)
+    return {k: v for k, v in c.items() if v is not None}
 
 
 def load_config() -> Config:

@@ -37,7 +37,7 @@ class InsertRequest(BaseModel):
 
 def init():
     global embedding, rag
-    embedding = Embedding(config.data_dir, config.embedding_model_name_or_path, config.device)
+    embedding = Embedding(config.data_dir, config.embedding_model_name_or_path, config.embedding_device)
     rag = RAG()
 
 
