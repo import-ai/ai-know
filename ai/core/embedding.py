@@ -7,20 +7,23 @@ from core.entity import Chunk, Retrieval
 
 
 class Embedding:
-    def __init__(self, datapath: str, model_name: str = "BAAI/bge-m3", device: str = "cpu"):
+    def __init__(self, datapath: str, model_name: str = "BAAI/bge-m3", device: str = "cpu", batch_size: int = 1):
         self.datapath: str = datapath
         self.client = chromadb.PersistentClient(path=datapath)
         self.collection = self.client.get_or_create_collection(
             name="default", metadata={"hnsw:space": "cosine"},
             embedding_function=SentenceTransformerEmbeddingFunction(model_name=model_name, device=device)
         )
+        self.batch_size: int = 1
 
     def insert(self, chunk_list: List[Chunk]):
-        self.collection.add(
-            documents=[c.text for c in chunk_list],
-            ids=[c.chunk_id for c in chunk_list],
-            metadatas=[c.metadata for c in chunk_list]
-        )
+        for i in range(0, len(chunk_list), self.batch_size):
+            batch: List[Chunk] = chunk_list[i:i + self.batch_size]
+            self.collection.add(
+                documents=[c.text for c in batch],
+                ids=[c.chunk_id for c in batch],
+                metadatas=[c.metadata for c in batch]
+            )
 
     def remove(self, doc_id: str):
         self.collection.delete(where={"doc_id": doc_id})

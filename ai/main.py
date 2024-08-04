@@ -75,9 +75,7 @@ async def exception_handler(_: Request, e: Exception) -> Response:
 async def create_or_update(doc_id: str, request: InsertRequest):
     embedding.remove(doc_id)
     chunk_list: List[Chunk] = split_markdown(doc_id, request.title, request.content)
-    for i in range(0, len(chunk_list), config.embedding_batch_size):
-        batch: List[Chunk] = chunk_list[i: i + config.embedding_batch_size]
-        embedding.insert(batch)
+    embedding.insert(chunk_list)
 
 
 @app.get("/api/index/recall", response_model=List[Retrieval])
