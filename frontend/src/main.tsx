@@ -6,6 +6,8 @@ import Root from '@/routes/root'
 import { Article } from '@/components/Article'
 import '@blocksuite/presets/themes/affine.css'
 import { EditorProvider } from '@/providers/EditorProvider'
+import { DevTools } from 'jotai-devtools'
+import 'jotai-devtools/styles.css'
 
 const router = createBrowserRouter([
   {
@@ -33,6 +35,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <EditorProvider>
       <RouterProvider router={router} />
+      <DevTools />
     </EditorProvider>
   </React.StrictMode>,
 )
