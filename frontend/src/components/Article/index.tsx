@@ -19,7 +19,6 @@ export const Article = () => {
   }, [content])
   return (
     <div className="p-10 bg-slate-50">
-      <code>Article {id}</code>
       <EditorContainer />
     </div>
   )
