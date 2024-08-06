@@ -32,4 +32,5 @@ class Chunk(BaseModel):
 
 class Retrieval(BaseModel):
     chunk: Chunk
-    distance: float
+    distance: float = Field(description="Recall score")
+    rank_score: float = Field(default=None, description="Ranker score")

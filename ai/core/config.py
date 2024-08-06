@@ -1,6 +1,6 @@
 import argparse
 import os
-from typing import Dict
+from typing import Dict, Type
 
 import yaml
 from pydantic import BaseModel, Field
@@ -10,23 +10,32 @@ from core.logger import get_logger
 logger = get_logger(__name__)
 
 
+class OpenAIConfig(BaseModel):
+    api_key: str
+    model: str = Field(default="gpt-3.5-turbo")
+    base_url: str = Field(default="https://api.openai.com/v1")
+
+
+class VectorDBConfig(BaseModel):
+    model_name_or_path: str = Field(default="BAAI/bge-m3")
+    batch_size: int = Field(default=1, description="batch size of embedding when insert data")
+    device: str = Field(default="cpu")
+    data_dir: str = Field(default="chroma_data")
+
+
+class RankerConfig(BaseModel):
+    model_name_or_path: str = Field(default="BAAI/bge-reranker-v2-m3")
+    batch_size: int = Field(default=1, description="batch size of calculating similarity")
+    device: str = Field(default="cpu")
+
+
 class Config(BaseModel):
     port: int = Field(default=8000)
     workers: int = Field(default=1)
 
-    openai_api_key: str
-    openai_model: str = Field(default="gpt-3.5-turbo")
-    openai_base_url: str = Field(default="https://api.openai.com/v1")
-
-    embedding_model_name_or_path: str = Field(default="BAAI/bge-m3")
-    embedding_batch_size: int = Field(default=1)
-    embedding_device: str = Field(default="cpu")
-
-    ranker_model_name_or_path: str = Field(default="BAAI/bge-reranker-v2-m3")
-    ranker_batch_size: int = Field(default=1)
-    ranker_device: str = Field(default="cpu")
-
-    data_dir: str = Field(default="chroma_data")
+    openai: OpenAIConfig
+    vector_db: VectorDBConfig
+    ranker: RankerConfig
 
 
 def load_from_config_file(yaml_path: str = "config.yaml") -> Dict[str, str]:
@@ -36,12 +45,34 @@ def load_from_config_file(yaml_path: str = "config.yaml") -> Dict[str, str]:
     return {}
 
 
-def load_from_env() -> Dict[str, str]:
-    c: Dict[str, str] = {}
+def dict_prefix_filter(prefix: str, data: dict) -> dict:
+    return {k[len(prefix):]: v for k, v in data.items() if k.startswith(prefix)}
 
-    for field_name in Config.__fields__.keys():
-        c[field_name] = os.getenv(field_name.upper(), None)
-    return {k: v for k, v in c.items() if v is not None}
+
+def dfs(define: Type[BaseModel], env_dict: Dict[str, str]) -> dict:
+    result = {}
+    for field_name, field_info in define.__fields__.items():
+        filtered_env_dict = dict_prefix_filter(field_name.upper(), env_dict)
+        if "" in filtered_env_dict:
+            assert len(filtered_env_dict) == 1, f"Conflict name: {field_name}"
+            value = filtered_env_dict.pop("")
+            result[field_name] = field_info.annotation(value)
+            continue
+        if filtered_env_dict:
+            result[field_name] = dfs(field_info.annotation, dict_prefix_filter("_", filtered_env_dict))
+    return result
+
+
+def load_from_env() -> Dict[str, str]:
+    env_prefix = "AI_KNOW"
+
+    env_dict: Dict[str, str] = dict_prefix_filter(env_prefix, dict(os.environ))
+    if "" in env_dict:
+        env_dict.pop("")
+
+    result = dfs(Config, dict_prefix_filter("_", env_dict))
+
+    return result
 
 
 def load_from_cli() -> Dict[str, str]:
@@ -59,6 +90,9 @@ def load_from_cli() -> Dict[str, str]:
     return {k: v for k, v in c.items() if v is not None}
 
 
+config = ...
+
+
 def load_config() -> Config:
     env_config: Dict[str, str] = load_from_env()
     yaml_config: Dict[str, str] = load_from_config_file()
@@ -67,4 +101,7 @@ def load_config() -> Config:
     return Config.model_validate(config_merge)
 
 
-config = load_config()
+def init_global_config():
+    global config
+    if config is ...:
+        config = load_config()

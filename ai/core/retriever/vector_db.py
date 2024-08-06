@@ -6,7 +6,7 @@ from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunct
 from core.entity import Chunk, Retrieval
 
 
-class Embedding:
+class VectorDB:
     def __init__(self, datapath: str, model_name: str = "BAAI/bge-m3", device: str = "cpu", batch_size: int = 1):
         self.datapath: str = datapath
         self.client = chromadb.PersistentClient(path=datapath)
@@ -14,7 +14,7 @@ class Embedding:
             name="default", metadata={"hnsw:space": "cosine"},
             embedding_function=SentenceTransformerEmbeddingFunction(model_name=model_name, device=device)
         )
-        self.batch_size: int = 1
+        self.batch_size: int = batch_size
 
     def insert(self, chunk_list: List[Chunk]):
         for i in range(0, len(chunk_list), self.batch_size):

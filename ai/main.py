@@ -1,4 +1,3 @@
-import os
 from contextlib import asynccontextmanager
 import json
 from datetime import datetime
@@ -13,7 +12,7 @@ from fastapi.responses import JSONResponse, Response, HTMLResponse
 from pydantic import BaseModel, Field
 
 from core.config import load_config, Config
-from core.embedding import Embedding
+from core.retriever.embedding import VectorDB
 from core.entity import Chunk, Retrieval
 from core.ingestion import split_markdown
 from core.logger import get_logger
@@ -26,7 +25,7 @@ with open("resource/index.html") as f:
 start_time: datetime = datetime.now()
 config: Config = load_config()
 logger = get_logger(__name__)
-embedding: Embedding = ...
+embedding: VectorDB = ...
 rag: RAG = ...
 
 
@@ -37,7 +36,7 @@ class InsertRequest(BaseModel):
 
 def init():
     global embedding, rag
-    embedding = Embedding(config.data_dir, config.embedding_model_name_or_path, config.embedding_device)
+    embedding = VectorDB(config.data_dir, config.vector_db_model_name_or_path, config.vector_db_device)
     rag = RAG()
 
 
