@@ -20,7 +20,7 @@ class VectorDBConfig(BaseModel):
     model_name_or_path: str = Field(default="BAAI/bge-m3")
     batch_size: int = Field(default=1, description="batch size of embedding when insert data")
     device: str = Field(default="cpu")
-    data_dir: str = Field(default="chroma_data")
+    path: str = Field(default="chroma_data")
 
 
 class RankerConfig(BaseModel):
@@ -90,18 +90,9 @@ def load_from_cli() -> Dict[str, str]:
     return {k: v for k, v in c.items() if v is not None}
 
 
-config = ...
-
-
 def load_config() -> Config:
     env_config: Dict[str, str] = load_from_env()
     yaml_config: Dict[str, str] = load_from_config_file()
     cli_config: Dict[str, str] = load_from_cli()
     config_merge: Dict[str, str] = {**yaml_config, **env_config, **cli_config}
     return Config.model_validate(config_merge)
-
-
-def init_global_config():
-    global config
-    if config is ...:
-        config = load_config()

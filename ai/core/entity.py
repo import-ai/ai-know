@@ -1,8 +1,9 @@
-from pydantic import BaseModel, Field
-from typing import Optional
-import shortuuid
 import time
 from enum import Enum
+from typing import Optional
+
+import shortuuid
+from pydantic import BaseModel, Field
 
 
 class ChunkType(str, Enum):
@@ -33,4 +34,4 @@ class Chunk(BaseModel):
 class Retrieval(BaseModel):
     chunk: Chunk
     distance: float = Field(description="Recall score")
-    rank_score: float = Field(default=None, description="Ranker score")
+    score: float = Field(default=None, description="Ranker score")

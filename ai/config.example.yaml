@@ -10,7 +10,7 @@ vector_db:
   model_name_or_path: "BAAI/bge-m3"
   batch_size: 1
   device: "cpu"
-  data_dir: "chroma_data"
+  path: "chroma_data"
 
 ranker:
   model_name_or_path: "BAAI/bge-reranker-v2-m3"

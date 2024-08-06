@@ -1,18 +1,18 @@
+from datetime import datetime
 from functools import partial
 from typing import List
 
 from openai import OpenAI
 
-from core.config import config
+from core.config import OpenAIConfig
 from core.entity import Retrieval, Chunk
-from datetime import datetime
 
 
 class RAG:
 
-    def __init__(self):
-        self.client = OpenAI(api_key=config.openai_api_key, base_url=config.openai_base_url)
-        self._chat = partial(self.client.chat.completions.create, model=config.openai_model)
+    def __init__(self, config: OpenAIConfig):
+        self.client = OpenAI(api_key=config.api_key, base_url=config.base_url)
+        self._chat = partial(self.client.chat.completions.create, model=config.model)
         with open("resource/prompt.md") as f:
             self.prompt: str = f.read()
 

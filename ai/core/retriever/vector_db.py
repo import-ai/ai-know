@@ -7,12 +7,12 @@ from core.entity import Chunk, Retrieval
 
 
 class VectorDB:
-    def __init__(self, datapath: str, model_name: str = "BAAI/bge-m3", device: str = "cpu", batch_size: int = 1):
-        self.datapath: str = datapath
-        self.client = chromadb.PersistentClient(path=datapath)
+    def __init__(self, path: str, model_name_or_path: str = "BAAI/bge-m3", device: str = "cpu", batch_size: int = 1):
+        self.data_dir: str = path
+        self.client = chromadb.PersistentClient(path=path)
         self.collection = self.client.get_or_create_collection(
             name="default", metadata={"hnsw:space": "cosine"},
-            embedding_function=SentenceTransformerEmbeddingFunction(model_name=model_name, device=device)
+            embedding_function=SentenceTransformerEmbeddingFunction(model_name=model_name_or_path, device=device)
         )
         self.batch_size: int = batch_size
 

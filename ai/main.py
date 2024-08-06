@@ -12,11 +12,11 @@ from fastapi.responses import JSONResponse, Response, HTMLResponse
 from pydantic import BaseModel, Field
 
 from core.config import load_config, Config
-from core.retriever.embedding import VectorDB
 from core.entity import Chunk, Retrieval
 from core.ingestion import split_markdown
 from core.logger import get_logger
 from core.rag import RAG
+from core.retriever.retriever import Retriever
 
 dumps = partial(json.dumps, ensure_ascii=False, separators=(",", ":"))
 
@@ -25,7 +25,7 @@ with open("resource/index.html") as f:
 start_time: datetime = datetime.now()
 config: Config = load_config()
 logger = get_logger(__name__)
-embedding: VectorDB = ...
+retriever: Retriever = ...
 rag: RAG = ...
 
 
@@ -35,17 +35,17 @@ class InsertRequest(BaseModel):
 
 
 def init():
-    global embedding, rag
-    embedding = VectorDB(config.data_dir, config.vector_db_model_name_or_path, config.vector_db_device)
-    rag = RAG()
+    global retriever, rag
+    retriever = Retriever(config.vector_db, config.ranker)
+    rag = RAG(config.openai)
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     init()
     yield
-    global embedding, rag
-    del embedding, rag
+    global retriever, rag
+    del retriever, rag
 
 
 app = FastAPI(lifespan=lifespan, title="AI Know", description="")
@@ -72,27 +72,27 @@ async def exception_handler(_: Request, e: Exception) -> Response:
 
 @app.put("/api/index/{doc_id}", response_model=None)
 async def create_or_update(doc_id: str, request: InsertRequest):
-    embedding.remove(doc_id)
+    retriever.vector_db.remove(doc_id)
     chunk_list: List[Chunk] = split_markdown(doc_id, request.title, request.content)
-    embedding.insert(chunk_list)
+    retriever.vector_db.insert(chunk_list)
 
 
 @app.get("/api/index/recall", response_model=List[Retrieval])
 async def recall(query: str, k: int):
-    retrieval_list: List[Retrieval] = embedding.query(query, k)
+    retrieval_list: List[Retrieval] = retriever.query(query, k)
     return retrieval_list
 
 
 def stream_chat(query: str) -> Iterator[str]:
     try:
-        retrieval_list: List[Retrieval] = embedding.query(query, 10)
+        retrieval_list: List[Retrieval] = retriever.query(query, 3)
 
         doc_id_list = []
         for retrieval in retrieval_list:
             if retrieval.chunk.doc_id not in doc_id_list:
                 doc_id_list.append(retrieval.chunk.doc_id)
 
-        for delta in rag.chat(query, retrieval_list):  # TODO Add rerank
+        for delta in rag.chat(query, retrieval_list):
             yield dumps({"response_type": "delta", "content": delta})
         yield dumps({"response_type": "citation", "content": [r.chunk.model_dump() for r in retrieval_list]})
     except Exception as e:
