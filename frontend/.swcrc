@@ -1,0 +1,17 @@
+{
+  "$schema": "https://swc.rs/schema.json",
+  "jsc": {
+    "experimental": {
+      "plugins": [
+        [
+          "@swc-jotai/debug-label",
+          {}
+        ],
+        [
+          "@swc-jotai/react-refresh",
+          {}
+        ]
+      ]
+    }
+  }
+}
