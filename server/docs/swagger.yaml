@@ -1,0 +1,147 @@
+definitions:
+  handlers.CreateEntry.Req:
+    properties:
+      parent:
+        type: string
+      position_after:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  handlers.CreateEntry.Resp:
+    properties:
+      entry:
+        $ref: '#/definitions/handlers.Entry'
+    type: object
+  handlers.Entry:
+    properties:
+      has_sub_entries:
+        type: boolean
+      id:
+        type: string
+      parent:
+        type: string
+      position_after:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  handlers.GetEntry.Resp:
+    properties:
+      entry:
+        $ref: '#/definitions/handlers.Entry'
+    type: object
+  handlers.GetSubEntries.Resp:
+    properties:
+      sub_entries:
+        items:
+          $ref: '#/definitions/handlers.Entry'
+        type: array
+    type: object
+  handlers.PutEntry.Req:
+    properties:
+      parent:
+        type: string
+      position_after:
+        type: string
+      title:
+        type: string
+    type: object
+  handlers.PutEntry.Resp:
+    properties:
+      entry:
+        $ref: '#/definitions/handlers.Entry'
+    type: object
+info:
+  contact: {}
+  license:
+    name: GPLv3
+  title: AIKnow API
+  version: "1.0"
+paths:
+  /api/sidebar/list/entries:
+    post:
+      description: Create an entry with the specified properties.
+      parameters:
+      - description: Request Body
+        in: body
+        name: Body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateEntry.Req'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CreateEntry.Resp'
+      summary: Create Entry
+      tags:
+      - Sidebar
+  /api/sidebar/list/entries/{entry_id}:
+    delete:
+      description: Delete an entry and all its sub-entries.
+      parameters:
+      - description: Entry ID
+        in: path
+        name: entry_id
+        required: true
+        type: string
+      responses: {}
+      summary: Delete Entry
+      tags:
+      - Sidebar
+    get:
+      description: Get properties of an entry.
+      parameters:
+      - description: Entry ID
+        in: path
+        name: entry_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.GetEntry.Resp'
+      summary: Get Entry
+      tags:
+      - Sidebar
+    put:
+      description: Update properties of an entry.
+      parameters:
+      - description: Request Body
+        in: body
+        name: Body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.PutEntry.Req'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.PutEntry.Resp'
+      summary: Update Entry
+      tags:
+      - Sidebar
+  /api/sidebar/list/entries/{entry_id}/sub_entries:
+    get:
+      description: Get sub-entries of an entry.
+      parameters:
+      - description: Entry ID
+        in: path
+        name: entry_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.GetSubEntries.Resp'
+      summary: Get Sub-Entries
+      tags:
+      - Sidebar
+swagger: "2.0"

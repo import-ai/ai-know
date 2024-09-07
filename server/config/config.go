@@ -16,7 +16,7 @@ func InitFromEnv() {
 	dataSourceName = os.Getenv("API_DATA_SOURCE_NAME")
 	jwtSecretKey = os.Getenv("API_JWT_SECRET_KEY")
 	aiServerAddr = os.Getenv("API_AI_SERVER_ADDR")
-	checkConfig()
+	//checkConfig()
 }
 
 func checkConfig() {
