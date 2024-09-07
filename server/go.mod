@@ -1,4 +1,4 @@
-module github.com/ycdzj/shuinotes/server
+module github.com/import-ai/ai-know/server
 
 go 1.22.4
 

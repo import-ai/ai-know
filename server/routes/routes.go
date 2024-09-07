@@ -2,8 +2,8 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/ycdzj/shuinotes/server/handlers"
-	"github.com/ycdzj/shuinotes/server/middlewares"
+	"github.com/import-ai/ai-know/server/handlers"
+	"github.com/import-ai/ai-know/server/middlewares"
 )
 
 func RegisterRoutes(router fiber.Router) {

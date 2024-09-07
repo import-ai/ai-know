@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/import-ai/ai-know/server/config"
 	"github.com/rs/zerolog/log"
-	"github.com/ycdzj/shuinotes/server/config"
 )
 
 type Doc struct {

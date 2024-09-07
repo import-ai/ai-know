@@ -4,11 +4,11 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/import-ai/ai-know/server/config"
+	"github.com/import-ai/ai-know/server/routes"
+	"github.com/import-ai/ai-know/server/store"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/ycdzj/shuinotes/server/config"
-	"github.com/ycdzj/shuinotes/server/routes"
-	"github.com/ycdzj/shuinotes/server/store"
 )
 
 func main() {

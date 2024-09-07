@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/import-ai/ai-know/server/auth"
+	"github.com/import-ai/ai-know/server/config"
+	"github.com/import-ai/ai-know/server/store"
+	"github.com/import-ai/ai-know/server/utils"
 	"github.com/rs/zerolog/log"
-	"github.com/ycdzj/shuinotes/server/auth"
-	"github.com/ycdzj/shuinotes/server/config"
-	"github.com/ycdzj/shuinotes/server/store"
-	"github.com/ycdzj/shuinotes/server/utils"
 )
 
 type User struct {
