@@ -53,7 +53,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "example": "1000005",
                         "description": "Entry ID",
                         "name": "entry_id",
                         "in": "path",
@@ -78,7 +77,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "example": "1000005",
                         "description": "Entry ID",
                         "name": "entry_id",
                         "in": "path",
@@ -112,7 +110,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "example": "1000005",
                         "description": "Entry ID",
                         "name": "entry_id",
                         "in": "path",
@@ -132,7 +129,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "example": "1000005",
                         "description": "Entry ID",
                         "name": "entry_id",
                         "in": "path",
@@ -168,7 +164,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "example": "1000005",
                         "description": "Entry ID",
                         "name": "entry_id",
                         "in": "path",

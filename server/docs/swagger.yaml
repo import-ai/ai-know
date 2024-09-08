@@ -155,7 +155,6 @@ paths:
       description: Delete an entry and all its sub-entries.
       parameters:
       - description: Entry ID
-        example: "1000005"
         in: path
         name: entry_id
         required: true
@@ -168,7 +167,6 @@ paths:
       description: Get properties of an entry.
       parameters:
       - description: Entry ID
-        example: "1000005"
         in: path
         name: entry_id
         required: true
@@ -195,7 +193,6 @@ paths:
         >     - If `position_after` is empty, the new entry will be the first in parent's sub-entries. Otherwise, it's positioned after the specified sub-entry.
       parameters:
       - description: Entry ID
-        example: "1000005"
         in: path
         name: entry_id
         required: true
@@ -228,7 +225,6 @@ paths:
         If `position_after` is empty, the new entry will be the first in parent's sub-entries. Otherwise, it's positioned after the specified sub-entry.
       parameters:
       - description: Entry ID
-        example: "1000005"
         in: path
         name: entry_id
         required: true
@@ -252,7 +248,6 @@ paths:
       description: Get sub-entries of an entry.
       parameters:
       - description: Entry ID
-        example: "1000005"
         in: path
         name: entry_id
         required: true

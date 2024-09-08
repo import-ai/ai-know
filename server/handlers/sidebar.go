@@ -45,7 +45,7 @@ func CreateEntry(c *fiber.Ctx) error {
 //	@Description	Get properties of an entry.
 //	@Tags			Sidebar
 //	@Router			/api/sidebar/entries/{entry_id} [get]
-//	@Param			entry_id	path		string	true	"Entry ID" example(1000005)
+//	@Param			entry_id	path		string	true	"Entry ID"
 //	@Success		200			{object}	handlers.GetEntry.Resp
 func GetEntry(c *fiber.Ctx) error {
 	type Resp struct {
@@ -69,7 +69,7 @@ func GetEntry(c *fiber.Ctx) error {
 //	@Description	>     - If `position_after` is empty, the new entry will be the first in parent's sub-entries. Otherwise, it's positioned after the specified sub-entry.
 //	@Tags			Sidebar
 //	@Router			/api/sidebar/entries/{entry_id} [put]
-//	@Param			entry_id	path		string					true	"Entry ID" example(1000005)
+//	@Param			entry_id	path		string					true	"Entry ID"
 //	@Param			Body		body		handlers.PutEntry.Req	true	"Request Body"
 //	@Success		200			{object}	handlers.PutEntry.Resp
 func PutEntry(c *fiber.Ctx) error {
@@ -90,7 +90,7 @@ func PutEntry(c *fiber.Ctx) error {
 //	@Summary		Delete Entry
 //	@Description	Delete an entry and all its sub-entries.
 //	@Tags			Sidebar
-//	@Param			entry_id	path	string	true	"Entry ID" example(1000005)
+//	@Param			entry_id	path	string	true	"Entry ID"
 //	@Router			/api/sidebar/entries/{entry_id} [delete]
 func DeleteEntry(c *fiber.Ctx) error {
 	return nil
@@ -102,7 +102,7 @@ func DeleteEntry(c *fiber.Ctx) error {
 //	@Description	Get sub-entries of an entry.
 //	@Tags			Sidebar
 //	@Router			/api/sidebar/entries/{entry_id}/sub_entries [get]
-//	@Param			entry_id	path		string	true	"Entry ID" example(1000005)
+//	@Param			entry_id	path		string	true	"Entry ID"
 //	@Success		200			{object}	handlers.GetSubEntries.Resp
 func GetSubEntries(c *fiber.Ctx) error {
 	type Resp struct {
@@ -125,7 +125,7 @@ func GetSubEntries(c *fiber.Ctx) error {
 //	@Description	If `position_after` is empty, the new entry will be the first in parent's sub-entries. Otherwise, it's positioned after the specified sub-entry.
 //	@Tags			Sidebar
 //	@Router			/api/sidebar/entries/{entry_id}/duplicate [post]
-//	@Param			entry_id	path		string						true	"Entry ID" example(1000005)
+//	@Param			entry_id	path		string						true	"Entry ID"
 //	@Param			Body		body		handlers.DuplicateEntry.Req	true	"Request Body"
 //	@Success		200			{object}	handlers.DuplicateEntry.Resp
 func DuplicateEntry(c *fiber.Ctx) error {
