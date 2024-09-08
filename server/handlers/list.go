@@ -3,12 +3,10 @@ package handlers
 import "github.com/gofiber/fiber/v2"
 
 type Entry struct {
-	ID            string `json:"id"`
-	Title         string `json:"title"`
-	Type          string `json:"type"`
-	Parent        string `json:"parent"`
-	PositionAfter string `json:"position_after"`
-	HasSubEntries bool   `json:"has_sub_entries"`
+	ID            string `json:"id" example:"1000001"`
+	Title         string `json:"title" example:"Note Title"`
+	Type          string `json:"type" example:"note" enums:"note,group,link"`
+	HasSubEntries bool   `json:"has_sub_entries" example:"false"`
 }
 
 // CreateEntry
@@ -85,9 +83,9 @@ func DeleteEntry(c *fiber.Ctx) error {
 //	@Summary		Get Sub-Entries
 //	@Description	Get sub-entries of an entry.
 //	@Tags			Sidebar
+//	@Router			/api/sidebar/list/entries/{entry_id}/sub_entries [get]
 //	@Param			entry_id	path		string	true	"Entry ID"
 //	@Success		200			{object}	handlers.GetSubEntries.Resp
-//	@Router			/api/sidebar/list/entries/{entry_id}/sub_entries [get]
 func GetSubEntries(c *fiber.Ctx) error {
 	type Resp struct {
 		SubEntries []*Entry `json:"sub_entries"`
@@ -95,6 +93,22 @@ func GetSubEntries(c *fiber.Ctx) error {
 	return nil
 }
 
+// DuplicateEntry
+//
+//	@Summary		Duplicate Entry
+//	@Description	Duplicate an entry.
+//	@Tags			Sidebar
+//	@Router			/api/sidebar/list/entries/{entry_id}/duplicate [post]
+//	@Param			Body	body		handlers.DuplicateEntry.Req	true	"Request Body"
+//	@Success		200		{object}	handlers.DuplicateEntry.Resp
 func DuplicateEntry(c *fiber.Ctx) error {
+	type Req struct {
+		Title         string `json:"title"`
+		Parent        string `json:"parent"`
+		PositionAfter string `json:"position_after"`
+	}
+	type Resp struct {
+		Entry *Entry `json:"entry"`
+	}
 	return nil
 }

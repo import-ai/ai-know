@@ -115,6 +115,34 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/api/sidebar/list/entries/{entry_id}/duplicate": {
+            "post": {
+                "description": "Duplicate an entry.",
+                "tags": [
+                    "Sidebar"
+                ],
+                "summary": "Duplicate Entry",
+                "parameters": [
+                    {
+                        "description": "Request Body",
+                        "name": "Body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.DuplicateEntry.Req"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.DuplicateEntry.Resp"
+                        }
+                    }
+                }
+            }
+        },
         "/api/sidebar/list/entries/{entry_id}/sub_entries": {
             "get": {
                 "description": "Get sub-entries of an entry.",
@@ -168,15 +196,9 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.Entry": {
+        "handlers.DuplicateEntry.Req": {
             "type": "object",
             "properties": {
-                "has_sub_entries": {
-                    "type": "boolean"
-                },
-                "id": {
-                    "type": "string"
-                },
                 "parent": {
                     "type": "string"
                 },
@@ -185,9 +207,40 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "handlers.DuplicateEntry.Resp": {
+            "type": "object",
+            "properties": {
+                "entry": {
+                    "$ref": "#/definitions/handlers.Entry"
+                }
+            }
+        },
+        "handlers.Entry": {
+            "type": "object",
+            "properties": {
+                "has_sub_entries": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "id": {
+                    "type": "string",
+                    "example": "1000001"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Note Title"
                 },
                 "type": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "note",
+                        "group",
+                        "link"
+                    ],
+                    "example": "note"
                 }
             }
         },

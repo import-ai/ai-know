@@ -15,19 +15,37 @@ definitions:
       entry:
         $ref: '#/definitions/handlers.Entry'
     type: object
-  handlers.Entry:
+  handlers.DuplicateEntry.Req:
     properties:
-      has_sub_entries:
-        type: boolean
-      id:
-        type: string
       parent:
         type: string
       position_after:
         type: string
       title:
         type: string
+    type: object
+  handlers.DuplicateEntry.Resp:
+    properties:
+      entry:
+        $ref: '#/definitions/handlers.Entry'
+    type: object
+  handlers.Entry:
+    properties:
+      has_sub_entries:
+        example: false
+        type: boolean
+      id:
+        example: "1000001"
+        type: string
+      title:
+        example: Note Title
+        type: string
       type:
+        enum:
+        - note
+        - group
+        - link
+        example: note
         type: string
     type: object
   handlers.GetEntry.Resp:
@@ -125,6 +143,24 @@ paths:
           schema:
             $ref: '#/definitions/handlers.PutEntry.Resp'
       summary: Update Entry
+      tags:
+      - Sidebar
+  /api/sidebar/list/entries/{entry_id}/duplicate:
+    post:
+      description: Duplicate an entry.
+      parameters:
+      - description: Request Body
+        in: body
+        name: Body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.DuplicateEntry.Req'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.DuplicateEntry.Resp'
+      summary: Duplicate Entry
       tags:
       - Sidebar
   /api/sidebar/list/entries/{entry_id}/sub_entries:
