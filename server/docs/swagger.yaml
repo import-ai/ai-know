@@ -2,12 +2,16 @@ definitions:
   handlers.CreateEntry.Req:
     properties:
       parent:
+        example: "10000003"
         type: string
       position_after:
+        example: "10000002"
         type: string
       title:
+        example: Note Title
         type: string
       type:
+        example: note
         type: string
     type: object
   handlers.CreateEntry.Resp:
@@ -18,10 +22,13 @@ definitions:
   handlers.DuplicateEntry.Req:
     properties:
       parent:
+        example: "10000003"
         type: string
       position_after:
+        example: "10000002"
         type: string
       title:
+        example: Note Title
         type: string
     type: object
   handlers.DuplicateEntry.Resp:
@@ -29,13 +36,22 @@ definitions:
       entry:
         $ref: '#/definitions/handlers.Entry'
     type: object
+  handlers.Entries:
+    properties:
+      private:
+        example: "1000001"
+        type: string
+      team:
+        example: "1000002"
+        type: string
+    type: object
   handlers.Entry:
     properties:
       has_sub_entries:
         example: false
         type: boolean
       id:
-        example: "1000001"
+        example: "1000005"
         type: string
       title:
         example: Note Title
@@ -60,13 +76,21 @@ definitions:
           $ref: '#/definitions/handlers.Entry'
         type: array
     type: object
+  handlers.GetWorkspace.Resp:
+    properties:
+      entries:
+        $ref: '#/definitions/handlers.Entries'
+    type: object
   handlers.PutEntry.Req:
     properties:
       parent:
+        example: "10000003"
         type: string
       position_after:
+        example: "10000002"
         type: string
       title:
+        example: Note Title
         type: string
     type: object
   handlers.PutEntry.Resp:
@@ -81,9 +105,18 @@ info:
   title: AIKnow API
   version: "1.0"
 paths:
-  /api/sidebar/list/entries:
+  /api/sidebar/entries:
     post:
-      description: Create an entry with the specified properties.
+      description: |-
+        Create an entry with the specified properties.
+        |      Field      | Required |      Description      |
+        | :-------------: | :------: | :-------------------: |
+        |      title      |   Yes    |  Title of new entry   |
+        |      type       |   Yes    |   Type of new entry   |
+        |     parent      |   Yes    |    Parent entry ID    |
+        | posistion_after |    No    | Position of new entry |
+
+        If `position_after` is empty, the new entry will be the first in parent's sub-entries. Otherwise, it's positioned after the specified sub-entry.
       parameters:
       - description: Request Body
         in: body
@@ -99,7 +132,7 @@ paths:
       summary: Create Entry
       tags:
       - Sidebar
-  /api/sidebar/list/entries/{entry_id}:
+  /api/sidebar/entries/{entry_id}:
     delete:
       description: Delete an entry and all its sub-entries.
       parameters:
@@ -129,8 +162,19 @@ paths:
       tags:
       - Sidebar
     put:
-      description: Update properties of an entry.
+      description: |
+        Update properties of an entry.
+        |      Field      | Required |      Description      |
+        | :-------------: | :------: | :-------------------: |
+        |      title      |    No    |  Title of the entry   |
+        |     parent      |    No    |    Parent entry ID    |
+        | posistion_after |    No    | Position of the entry |
       parameters:
+      - description: Entry ID
+        in: path
+        name: entry_id
+        required: true
+        type: string
       - description: Request Body
         in: body
         name: Body
@@ -145,10 +189,24 @@ paths:
       summary: Update Entry
       tags:
       - Sidebar
-  /api/sidebar/list/entries/{entry_id}/duplicate:
+  /api/sidebar/entries/{entry_id}/duplicate:
     post:
-      description: Duplicate an entry.
+      description: |-
+        Duplicate an entry.
+        |      Field      | Required |      Description      |
+        | :-------------: | :------: | :-------------------: |
+        |      title      |    No    |  Title of new entry   |
+        |     parent      |   Yes    |    Parent entry ID    |
+        | posistion_after |    No    | Position of new entry |
+
+        If `title` is empty, it will default to the old entry’s title.
+        If `position_after` is empty, the new entry will be the first in parent's sub-entries. Otherwise, it's positioned after the specified sub-entry.
       parameters:
+      - description: Entry ID
+        in: path
+        name: entry_id
+        required: true
+        type: string
       - description: Request Body
         in: body
         name: Body
@@ -163,7 +221,7 @@ paths:
       summary: Duplicate Entry
       tags:
       - Sidebar
-  /api/sidebar/list/entries/{entry_id}/sub_entries:
+  /api/sidebar/entries/{entry_id}/sub_entries:
     get:
       description: Get sub-entries of an entry.
       parameters:
@@ -180,4 +238,15 @@ paths:
       summary: Get Sub-Entries
       tags:
       - Sidebar
+  /api/workspace:
+    get:
+      description: Get properties of current workspace.
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.GetWorkspace.Resp'
+      summary: Get Workspace
+      tags:
+      - Workspace
 swagger: "2.0"

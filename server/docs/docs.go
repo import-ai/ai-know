@@ -18,9 +18,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/sidebar/list/entries": {
+        "/api/sidebar/entries": {
             "post": {
-                "description": "Create an entry with the specified properties.",
+                "description": "Create an entry with the specified properties.\n|      Field      | Required |      Description      |\n| :-------------: | :------: | :-------------------: |\n|      title      |   Yes    |  Title of new entry   |\n|      type       |   Yes    |   Type of new entry   |\n|     parent      |   Yes    |    Parent entry ID    |\n| posistion_after |    No    | Position of new entry |\n\nIf ` + "`" + `position_after` + "`" + ` is empty, the new entry will be the first in parent's sub-entries. Otherwise, it's positioned after the specified sub-entry.",
                 "tags": [
                     "Sidebar"
                 ],
@@ -46,7 +46,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/sidebar/list/entries/{entry_id}": {
+        "/api/sidebar/entries/{entry_id}": {
             "get": {
                 "description": "Get properties of an entry.",
                 "tags": [
@@ -72,12 +72,19 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Update properties of an entry.",
+                "description": "Update properties of an entry.\n|      Field      | Required |      Description      |\n| :-------------: | :------: | :-------------------: |\n|      title      |    No    |  Title of the entry   |\n|     parent      |    No    |    Parent entry ID    |\n| posistion_after |    No    | Position of the entry |\n",
                 "tags": [
                     "Sidebar"
                 ],
                 "summary": "Update Entry",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Entry ID",
+                        "name": "entry_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "Request Body",
                         "name": "Body",
@@ -115,14 +122,21 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/api/sidebar/list/entries/{entry_id}/duplicate": {
+        "/api/sidebar/entries/{entry_id}/duplicate": {
             "post": {
-                "description": "Duplicate an entry.",
+                "description": "Duplicate an entry.\n|      Field      | Required |      Description      |\n| :-------------: | :------: | :-------------------: |\n|      title      |    No    |  Title of new entry   |\n|     parent      |   Yes    |    Parent entry ID    |\n| posistion_after |    No    | Position of new entry |\n\nIf ` + "`" + `title` + "`" + ` is empty, it will default to the old entry’s title.\nIf ` + "`" + `position_after` + "`" + ` is empty, the new entry will be the first in parent's sub-entries. Otherwise, it's positioned after the specified sub-entry.",
                 "tags": [
                     "Sidebar"
                 ],
                 "summary": "Duplicate Entry",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Entry ID",
+                        "name": "entry_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "Request Body",
                         "name": "Body",
@@ -143,7 +157,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/sidebar/list/entries/{entry_id}/sub_entries": {
+        "/api/sidebar/entries/{entry_id}/sub_entries": {
             "get": {
                 "description": "Get sub-entries of an entry.",
                 "tags": [
@@ -168,6 +182,23 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/workspace": {
+            "get": {
+                "description": "Get properties of current workspace.",
+                "tags": [
+                    "Workspace"
+                ],
+                "summary": "Get Workspace",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.GetWorkspace.Resp"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -175,16 +206,20 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "parent": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "10000003"
                 },
                 "position_after": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "10000002"
                 },
                 "title": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Note Title"
                 },
                 "type": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "note"
                 }
             }
         },
@@ -200,13 +235,16 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "parent": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "10000003"
                 },
                 "position_after": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "10000002"
                 },
                 "title": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Note Title"
                 }
             }
         },
@@ -215,6 +253,19 @@ const docTemplate = `{
             "properties": {
                 "entry": {
                     "$ref": "#/definitions/handlers.Entry"
+                }
+            }
+        },
+        "handlers.Entries": {
+            "type": "object",
+            "properties": {
+                "private": {
+                    "type": "string",
+                    "example": "1000001"
+                },
+                "team": {
+                    "type": "string",
+                    "example": "1000002"
                 }
             }
         },
@@ -227,7 +278,7 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string",
-                    "example": "1000001"
+                    "example": "1000005"
                 },
                 "title": {
                     "type": "string",
@@ -263,17 +314,28 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.GetWorkspace.Resp": {
+            "type": "object",
+            "properties": {
+                "entries": {
+                    "$ref": "#/definitions/handlers.Entries"
+                }
+            }
+        },
         "handlers.PutEntry.Req": {
             "type": "object",
             "properties": {
                 "parent": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "10000003"
                 },
                 "position_after": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "10000002"
                 },
                 "title": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Note Title"
                 }
             }
         },

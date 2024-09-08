@@ -14,7 +14,7 @@ func RegisterRoutes(router fiber.Router) {
 	router.Get("/swagger/*", swagger.HandlerDefault)
 
 	router.Route("/api", func(router fiber.Router) {
-		router.Route("/sidebar/list/entries", func(router fiber.Router) {
+		router.Route("/sidebar/entries", func(router fiber.Router) {
 			router.Post("", handlers.CreateEntry)
 			router.Route("/:entry_id", func(router fiber.Router) {
 				router.Get("", handlers.GetEntry)
