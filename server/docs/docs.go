@@ -10,9 +10,6 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {},
-        "license": {
-            "name": "GPLv3"
-        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
@@ -56,6 +53,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "example": "1000005",
                         "description": "Entry ID",
                         "name": "entry_id",
                         "in": "path",
@@ -72,7 +70,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Update properties of an entry.\n|      Field      | Required |      Description      |\n| :-------------: | :------: | :-------------------: |\n|      title      |    No    |  Title of the entry   |\n|     parent      |    No    |    Parent entry ID    |\n| posistion_after |    No    | Position of the entry |\n",
+                "description": "Update properties of an entry.\n|      Field      | Required |      Description      |\n| :-------------: | :------: | :-------------------: |\n|      title      |    No    |  Title of the entry   |\n|     parent      |    No    |    Parent entry ID    |\n| posistion_after |    No    | Position of the entry |\n\n\u003e - If ` + "`" + `title` + "`" + ` is non-empty, update title of the entry.\n\u003e - If ` + "`" + `parent` + "`" + ` is non-empty, move the entry to the specified parent entry.\n\u003e     - If ` + "`" + `position_after` + "`" + ` is empty, the new entry will be the first in parent's sub-entries. Otherwise, it's positioned after the specified sub-entry.",
                 "tags": [
                     "Sidebar"
                 ],
@@ -80,6 +78,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "example": "1000005",
                         "description": "Entry ID",
                         "name": "entry_id",
                         "in": "path",
@@ -113,6 +112,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "example": "1000005",
                         "description": "Entry ID",
                         "name": "entry_id",
                         "in": "path",
@@ -132,6 +132,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "example": "1000005",
                         "description": "Entry ID",
                         "name": "entry_id",
                         "in": "path",
@@ -167,6 +168,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "example": "1000005",
                         "description": "Entry ID",
                         "name": "entry_id",
                         "in": "path",
@@ -357,7 +359,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "AIKnow API",
-	Description:      "",
+	Description:      "## Sidebar 多级列表\n\n列表的每一项是一个`entry`，主要字段是`id`，`type`和`title`。\n\n- `id`: 全局唯一标识\n- `type`: 合法取值为`note`，`group`或`link`\n- `title`: 标题\n\n一个`entry`下可以嵌套子`entry`，形成树形结构。\n\n### 查询流程\n\n1. 调用`Get Workspace`拿到 Private 和 Team Space 分别对应的最外层`entry id`。\n2. 调用`Get Sub-Entries`，传参`entry id`，拿到该`entry`直接嵌套的子`entry`列表。\n3. 如果子`entry`继续嵌套子`entry`（`has_sub_entries`为`true`），递归调用`Get Sub-Entries`。\n\n### 拖拽/移动流程\n\n调用`Update Entry`，更新`entry`的`parent`和`position`。",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

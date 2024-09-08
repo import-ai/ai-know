@@ -100,8 +100,26 @@ definitions:
     type: object
 info:
   contact: {}
-  license:
-    name: GPLv3
+  description: |-
+    ## Sidebar 多级列表
+
+    列表的每一项是一个`entry`，主要字段是`id`，`type`和`title`。
+
+    - `id`: 全局唯一标识
+    - `type`: 合法取值为`note`，`group`或`link`
+    - `title`: 标题
+
+    一个`entry`下可以嵌套子`entry`，形成树形结构。
+
+    ### 查询流程
+
+    1. 调用`Get Workspace`拿到 Private 和 Team Space 分别对应的最外层`entry id`。
+    2. 调用`Get Sub-Entries`，传参`entry id`，拿到该`entry`直接嵌套的子`entry`列表。
+    3. 如果子`entry`继续嵌套子`entry`（`has_sub_entries`为`true`），递归调用`Get Sub-Entries`。
+
+    ### 拖拽/移动流程
+
+    调用`Update Entry`，更新`entry`的`parent`和`position`。
   title: AIKnow API
   version: "1.0"
 paths:
@@ -137,6 +155,7 @@ paths:
       description: Delete an entry and all its sub-entries.
       parameters:
       - description: Entry ID
+        example: "1000005"
         in: path
         name: entry_id
         required: true
@@ -149,6 +168,7 @@ paths:
       description: Get properties of an entry.
       parameters:
       - description: Entry ID
+        example: "1000005"
         in: path
         name: entry_id
         required: true
@@ -162,15 +182,20 @@ paths:
       tags:
       - Sidebar
     put:
-      description: |
+      description: |-
         Update properties of an entry.
         |      Field      | Required |      Description      |
         | :-------------: | :------: | :-------------------: |
         |      title      |    No    |  Title of the entry   |
         |     parent      |    No    |    Parent entry ID    |
         | posistion_after |    No    | Position of the entry |
+
+        > - If `title` is non-empty, update title of the entry.
+        > - If `parent` is non-empty, move the entry to the specified parent entry.
+        >     - If `position_after` is empty, the new entry will be the first in parent's sub-entries. Otherwise, it's positioned after the specified sub-entry.
       parameters:
       - description: Entry ID
+        example: "1000005"
         in: path
         name: entry_id
         required: true
@@ -203,6 +228,7 @@ paths:
         If `position_after` is empty, the new entry will be the first in parent's sub-entries. Otherwise, it's positioned after the specified sub-entry.
       parameters:
       - description: Entry ID
+        example: "1000005"
         in: path
         name: entry_id
         required: true
@@ -226,6 +252,7 @@ paths:
       description: Get sub-entries of an entry.
       parameters:
       - description: Entry ID
+        example: "1000005"
         in: path
         name: entry_id
         required: true
