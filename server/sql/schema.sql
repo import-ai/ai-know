@@ -1,0 +1,22 @@
+CREATE TYPE sidebar_entry_type AS ENUM ('group','note', 'link');
+
+CREATE TABLE sidebar_entries
+(
+    id              BIGSERIAL                NOT NULL PRIMARY KEY,
+    type            sidebar_entry_type       NOT NULL,
+    title           TEXT                     NOT NULL,
+    parent_id       BIGINT                   NULL REFERENCES sidebar_entries (id),
+    first_child_id  BIGINT                   NULL REFERENCES sidebar_entries (id),
+    next_brother_id BIGINT                   NULL REFERENCES sidebar_entries (id),
+    created_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE workspaces
+(
+    id                    BIGSERIAL                NOT NULL PRIMARY KEY,
+    private_sidebar_entry BIGINT                   NOT NULL REFERENCES sidebar_entries (id),
+    team_sidebar_entry    BIGINT                   NOT NULL REFERENCES sidebar_entries (id),
+    created_at            TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at            TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
