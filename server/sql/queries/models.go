@@ -55,14 +55,13 @@ func (ns NullSidebarEntryType) Value() (driver.Value, error) {
 }
 
 type SidebarEntry struct {
-	ID            int64
-	Type          SidebarEntryType
-	Title         string
-	ParentID      pgtype.Int8
-	FirstChildID  pgtype.Int8
-	NextBrotherID pgtype.Int8
-	CreatedAt     pgtype.Timestamptz
-	UpdatedAt     pgtype.Timestamptz
+	ID        int64
+	Type      SidebarEntryType
+	Title     string
+	ParentID  pgtype.Int8
+	PrevID    pgtype.Int8
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
 }
 
 type Workspace struct {

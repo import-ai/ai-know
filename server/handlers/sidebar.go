@@ -1,12 +1,35 @@
 package handlers
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"errors"
+	"strconv"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/import-ai/ai-know/server/db"
+	"github.com/import-ai/ai-know/server/sql/queries"
+)
 
 type Entry struct {
 	ID            string `json:"id" example:"1000005"`
 	Title         string `json:"title" example:"Note Title"`
 	Type          string `json:"type" example:"note" enums:"note,group,link"`
 	HasSubEntries bool   `json:"has_sub_entries" example:"false"`
+}
+
+var ErrInvalidEntryType = errors.New("Invalid entry type")
+
+func isValidEntryType(t string) bool {
+	validTypes := []queries.SidebarEntryType{
+		queries.SidebarEntryTypeLink,
+		queries.SidebarEntryTypeNote,
+		queries.SidebarEntryTypeGroup,
+	}
+	for _, validType := range validTypes {
+		if string(validType) == t {
+			return true
+		}
+	}
+	return false
 }
 
 // CreateEntry
@@ -36,7 +59,42 @@ func CreateEntry(c *fiber.Ctx) error {
 		Entry *Entry `json:"entry"`
 	}
 
-	return nil
+	req := &Req{}
+	err := c.BodyParser(req)
+	if err != nil {
+		return err
+	}
+	if !isValidEntryType(req.Type) {
+		return ErrInvalidEntryType
+	}
+
+	args := &db.CreateSidebarEntryArgs{
+		Title: req.Title,
+		Type:  queries.SidebarEntryType(req.Type),
+	}
+	args.Parent, err = strconv.ParseInt(req.Parent, 10, 64)
+	if err != nil {
+		return err
+	}
+	if req.PositionAfter != "" {
+		args.PositionAfter, err = strconv.ParseInt(req.PositionAfter, 10, 64)
+		if err != nil {
+			return err
+		}
+	}
+
+	entry, err := db.CreateSidebarEntry(c.Context(), args)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(&Resp{
+		Entry: &Entry{
+			ID:    strconv.FormatInt(entry.ID, 10),
+			Title: entry.Title,
+			Type:  string(entry.Type),
+		},
+	})
 }
 
 // GetEntry

@@ -9,25 +9,36 @@ FROM workspaces
 WHERE id = $1;
 
 -- name: CreateSidebarEntry :one
-INSERT INTO sidebar_entries(type, title, parent_id, first_child_id, next_brother_id)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO sidebar_entries(type, title, parent_id, prev_id)
+VALUES ($1, $2, $3, $4)
 RETURNING *;
 
--- name: UpdateFirstChild :one
+-- name: ReplacePrevEntry :one
 UPDATE sidebar_entries
-SET first_child_id = @new_val
-WHERE id = @id
-  AND first_child_id = @old_val
+SET prev_id = @new_prev
+WHERE parent_id = @parent_id
+  AND prev_id = @old_prev
 RETURNING *;
 
--- name: UpdateNextBrother :one
+-- name: SetPrevEntry :one
 UPDATE sidebar_entries
-SET next_brother_id = @new_val
-WHERE id = @id
-  AND next_brother_id = @old_val
+SET prev_id = $2
+WHERE id = $1
+  AND prev_id IS NULL
 RETURNING *;
 
 -- name: GetSidebarEntry :one
 SELECT *
 FROM sidebar_entries
 WHERE id = $1;
+
+-- name: LockSidebarEntry :one
+SELECT *
+FROM sidebar_entries
+WHERE id = $1 FOR UPDATE;
+
+-- name: GetNextSidebarEntry :one
+SELECT *
+FROM sidebar_entries
+WHERE parent_id = $1
+  AND prev_id = $2;

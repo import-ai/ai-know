@@ -1,6 +1,11 @@
 package handlers
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"strconv"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/import-ai/ai-know/server/db"
+)
 
 type Entries struct {
 	Private string `json:"private" example:"1000001"`
@@ -18,5 +23,21 @@ func GetWorkspace(c *fiber.Ctx) error {
 	type Resp struct {
 		Entries *Entries `json:"entries"`
 	}
-	return nil
+	ctx := c.Context()
+	workspace, err := db.GetWorkspace(ctx, 1)
+	if err != nil {
+		return err
+	}
+	if workspace == nil {
+		workspace, err = db.CreateFirstWorkspace(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return c.JSON(&Resp{
+		Entries: &Entries{
+			Private: strconv.FormatInt(workspace.PrivateSidebarEntry, 10),
+			Team:    strconv.FormatInt(workspace.TeamSidebarEntry, 10),
+		},
+	})
 }
