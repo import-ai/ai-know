@@ -69,20 +69,14 @@ func (q *Queries) CreateWorkspace(ctx context.Context, arg *CreateWorkspaceParam
 	return &i, err
 }
 
-const getNextSidebarEntry = `-- name: GetNextSidebarEntry :one
+const getSidebarEntry = `-- name: GetSidebarEntry :one
 SELECT id, type, title, parent_id, prev_id, created_at, updated_at
 FROM sidebar_entries
-WHERE parent_id = $1
-  AND prev_id = $2
+WHERE id = $1
 `
 
-type GetNextSidebarEntryParams struct {
-	ParentID pgtype.Int8
-	PrevID   pgtype.Int8
-}
-
-func (q *Queries) GetNextSidebarEntry(ctx context.Context, arg *GetNextSidebarEntryParams) (*SidebarEntry, error) {
-	row := q.db.QueryRow(ctx, getNextSidebarEntry, arg.ParentID, arg.PrevID)
+func (q *Queries) GetSidebarEntry(ctx context.Context, id int64) (*SidebarEntry, error) {
+	row := q.db.QueryRow(ctx, getSidebarEntry, id)
 	var i SidebarEntry
 	err := row.Scan(
 		&i.ID,
@@ -96,14 +90,20 @@ func (q *Queries) GetNextSidebarEntry(ctx context.Context, arg *GetNextSidebarEn
 	return &i, err
 }
 
-const getSidebarEntry = `-- name: GetSidebarEntry :one
+const getSidebarSubEntry = `-- name: GetSidebarSubEntry :one
 SELECT id, type, title, parent_id, prev_id, created_at, updated_at
 FROM sidebar_entries
-WHERE id = $1
+WHERE parent_id = $1
+  AND prev_id = $2
 `
 
-func (q *Queries) GetSidebarEntry(ctx context.Context, id int64) (*SidebarEntry, error) {
-	row := q.db.QueryRow(ctx, getSidebarEntry, id)
+type GetSidebarSubEntryParams struct {
+	ParentID pgtype.Int8
+	PrevID   pgtype.Int8
+}
+
+func (q *Queries) GetSidebarSubEntry(ctx context.Context, arg *GetSidebarSubEntryParams) (*SidebarEntry, error) {
+	row := q.db.QueryRow(ctx, getSidebarSubEntry, arg.ParentID, arg.PrevID)
 	var i SidebarEntry
 	err := row.Scan(
 		&i.ID,
@@ -186,21 +186,49 @@ func (q *Queries) ReplacePrevEntry(ctx context.Context, arg *ReplacePrevEntryPar
 	return &i, err
 }
 
-const setPrevEntry = `-- name: SetPrevEntry :one
+const setEntryTitle = `-- name: SetEntryTitle :one
 UPDATE sidebar_entries
-SET prev_id = $2
+SET title = $2
 WHERE id = $1
-  AND prev_id IS NULL
 RETURNING id, type, title, parent_id, prev_id, created_at, updated_at
 `
 
-type SetPrevEntryParams struct {
-	ID     int64
-	PrevID pgtype.Int8
+type SetEntryTitleParams struct {
+	ID    int64
+	Title string
 }
 
-func (q *Queries) SetPrevEntry(ctx context.Context, arg *SetPrevEntryParams) (*SidebarEntry, error) {
-	row := q.db.QueryRow(ctx, setPrevEntry, arg.ID, arg.PrevID)
+func (q *Queries) SetEntryTitle(ctx context.Context, arg *SetEntryTitleParams) (*SidebarEntry, error) {
+	row := q.db.QueryRow(ctx, setEntryTitle, arg.ID, arg.Title)
+	var i SidebarEntry
+	err := row.Scan(
+		&i.ID,
+		&i.Type,
+		&i.Title,
+		&i.ParentID,
+		&i.PrevID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return &i, err
+}
+
+const setParentPrevEntry = `-- name: SetParentPrevEntry :one
+UPDATE sidebar_entries
+SET parent_id = $2,
+    prev_id   = $3
+WHERE id = $1
+RETURNING id, type, title, parent_id, prev_id, created_at, updated_at
+`
+
+type SetParentPrevEntryParams struct {
+	ID       int64
+	ParentID pgtype.Int8
+	PrevID   pgtype.Int8
+}
+
+func (q *Queries) SetParentPrevEntry(ctx context.Context, arg *SetParentPrevEntryParams) (*SidebarEntry, error) {
+	row := q.db.QueryRow(ctx, setParentPrevEntry, arg.ID, arg.ParentID, arg.PrevID)
 	var i SidebarEntry
 	err := row.Scan(
 		&i.ID,

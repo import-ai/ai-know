@@ -77,7 +77,7 @@ func CreateEntry(c *fiber.Ctx) error {
 		return err
 	}
 	if req.PositionAfter != "" {
-		args.PositionAfter, err = strconv.ParseInt(req.PositionAfter, 10, 64)
+		args.PrevID, err = strconv.ParseInt(req.PositionAfter, 10, 64)
 		if err != nil {
 			return err
 		}
@@ -97,6 +97,15 @@ func CreateEntry(c *fiber.Ctx) error {
 	})
 }
 
+func ParseEntryID(c *fiber.Ctx) error {
+	entryID, err := strconv.ParseInt(c.Params("entry_id"), 10, 64)
+	if err != nil {
+		return err
+	}
+	c.Locals("entry_id", entryID)
+	return c.Next()
+}
+
 // GetEntry
 //
 //	@Summary		Get Entry
@@ -109,7 +118,27 @@ func GetEntry(c *fiber.Ctx) error {
 	type Resp struct {
 		Entry *Entry `json:"entry"`
 	}
-	return nil
+	ctx := c.Context()
+	entryID := c.Locals("entry_id").(int64)
+	entry, err := db.GetSidebarEntry(ctx, entryID)
+	if err != nil {
+		return err
+	}
+	if entry == nil {
+		return fiber.ErrNotFound
+	}
+	subEntry, err := db.GetSidebarSubEntry(ctx, entry.ID, entry.ID)
+	if err != nil {
+		return err
+	}
+	return c.JSON(&Resp{
+		Entry: &Entry{
+			ID:            strconv.FormatInt(entry.ID, 10),
+			Title:         entry.Title,
+			Type:          string(entry.Type),
+			HasSubEntries: subEntry != nil,
+		},
+	})
 }
 
 // PutEntry
@@ -139,8 +168,38 @@ func PutEntry(c *fiber.Ctx) error {
 	type Resp struct {
 		Entry *Entry `json:"entry"`
 	}
+	ctx := c.Context()
+	entryID := c.Locals("entry_id").(int64)
 
-	return nil
+	var req *Req
+	if err := c.BodyParser(&req); err != nil {
+		return err
+	}
+
+	args := &db.PutSidebarEntryArgs{
+		EntryID: entryID,
+		Title:   req.Title,
+	}
+
+	if req.Parent != "" {
+		var err error
+		args.Parent, err = strconv.ParseInt(req.Parent, 10, 64)
+		if err != nil {
+			return err
+		}
+	}
+	if req.PositionAfter != "" {
+		var err error
+		args.PrevID, err = strconv.ParseInt(req.PositionAfter, 10, 64)
+		if err != nil {
+			return err
+		}
+	}
+	if args.PrevID == 0 {
+		args.PrevID = args.Parent
+	}
+
+	return db.PutSidebarEntry(ctx, args)
 }
 
 // DeleteEntry

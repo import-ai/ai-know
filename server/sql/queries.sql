@@ -20,11 +20,11 @@ WHERE parent_id = @parent_id
   AND prev_id = @old_prev
 RETURNING *;
 
--- name: SetPrevEntry :one
+-- name: SetParentPrevEntry :one
 UPDATE sidebar_entries
-SET prev_id = $2
+SET parent_id = $2,
+    prev_id   = $3
 WHERE id = $1
-  AND prev_id IS NULL
 RETURNING *;
 
 -- name: GetSidebarEntry :one
@@ -37,8 +37,14 @@ SELECT *
 FROM sidebar_entries
 WHERE id = $1 FOR UPDATE;
 
--- name: GetNextSidebarEntry :one
+-- name: GetSidebarSubEntry :one
 SELECT *
 FROM sidebar_entries
 WHERE parent_id = $1
   AND prev_id = $2;
+
+-- name: SetEntryTitle :one
+UPDATE sidebar_entries
+SET title = $2
+WHERE id = $1
+RETURNING *;
