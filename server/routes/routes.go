@@ -12,6 +12,7 @@ func registerSidebarAPI(router fiber.Router) {
 	router.Route("/entries", func(router fiber.Router) {
 		router.Post("", handlers.CreateEntry)
 		router.Route("/:entry_id", func(router fiber.Router) {
+			router.Use(handlers.ParseEntryID)
 			router.Get("", handlers.GetEntry)
 			router.Put("", handlers.PutEntry)
 			router.Delete("", handlers.DeleteEntry)

@@ -79,15 +79,8 @@ func insertSidebarSubEntry(
 }
 
 func removeSidebarSubEntry(
-	ctx context.Context, q *queries.Queries, entryID int64,
+	ctx context.Context, q *queries.Queries, entry *queries.SidebarEntry,
 ) error {
-	entry, err := q.GetSidebarEntry(ctx, entryID)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return ErrEntryNotExist
-	}
-	if err != nil {
-		return err
-	}
 	if !entry.ParentID.Valid || !entry.PrevID.Valid {
 		return ErrInvalidEntry
 	}
@@ -186,7 +179,14 @@ func PutSidebarEntry(
 	}
 
 	if args.Parent != 0 {
-		if err := removeSidebarSubEntry(ctx, q, args.EntryID); err != nil {
+		entry, err := q.GetSidebarEntry(ctx, args.EntryID)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrEntryNotExist
+		}
+		if err != nil {
+			return err
+		}
+		if err := removeSidebarSubEntry(ctx, q, entry); err != nil {
 			return err
 		}
 		if err := insertSidebarSubEntry(
@@ -194,6 +194,28 @@ func PutSidebarEntry(
 		); err != nil {
 			return err
 		}
+	}
+
+	return tx.Commit(ctx)
+}
+
+func RemoveSidebarEntry(ctx context.Context, id int64) error {
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	q := newQueries().WithTx(tx)
+
+	entry, err := q.GetSidebarEntry(ctx, id)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return ErrEntryNotExist
+	}
+	if err != nil {
+		return err
+	}
+	if err := removeSidebarSubEntry(ctx, q, entry); err != nil {
+		return err
 	}
 
 	return tx.Commit(ctx)

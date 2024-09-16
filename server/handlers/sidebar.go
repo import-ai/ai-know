@@ -17,6 +17,7 @@ type Entry struct {
 }
 
 var ErrInvalidEntryType = errors.New("Invalid entry type")
+var ErrEntryNotExist = errors.New("Entry not exist")
 
 func isValidEntryType(t string) bool {
 	validTypes := []queries.SidebarEntryType{
@@ -30,6 +31,23 @@ func isValidEntryType(t string) bool {
 		}
 	}
 	return false
+}
+
+const kEntryID = "entry_id"
+
+func parsePosition(parent string, positionAfter string) (int64, int64, error) {
+	parentID, err := strconv.ParseInt(parent, 10, 64)
+	if err != nil {
+		return 0, 0, err
+	}
+	if positionAfter == "" {
+		return parentID, parentID, nil
+	}
+	prevID, err := strconv.ParseInt(positionAfter, 10, 64)
+	if err != nil {
+		return 0, 0, err
+	}
+	return parentID, prevID, nil
 }
 
 // CreateEntry
@@ -59,31 +77,27 @@ func CreateEntry(c *fiber.Ctx) error {
 		Entry *Entry `json:"entry"`
 	}
 
-	req := &Req{}
-	err := c.BodyParser(req)
-	if err != nil {
+	ctx := c.Context()
+
+	var req *Req
+	if err := c.BodyParser(&req); err != nil {
 		return err
 	}
 	if !isValidEntryType(req.Type) {
 		return ErrInvalidEntryType
 	}
 
-	args := &db.CreateSidebarEntryArgs{
-		Title: req.Title,
-		Type:  queries.SidebarEntryType(req.Type),
-	}
-	args.Parent, err = strconv.ParseInt(req.Parent, 10, 64)
+	parentID, prevID, err := parsePosition(req.Parent, req.PositionAfter)
 	if err != nil {
 		return err
 	}
-	if req.PositionAfter != "" {
-		args.PrevID, err = strconv.ParseInt(req.PositionAfter, 10, 64)
-		if err != nil {
-			return err
-		}
-	}
 
-	entry, err := db.CreateSidebarEntry(c.Context(), args)
+	entry, err := db.CreateSidebarEntry(ctx, &db.CreateSidebarEntryArgs{
+		Title:  req.Title,
+		Type:   queries.SidebarEntryType(req.Type),
+		Parent: parentID,
+		PrevID: prevID,
+	})
 	if err != nil {
 		return err
 	}
@@ -102,7 +116,7 @@ func ParseEntryID(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	c.Locals("entry_id", entryID)
+	c.Locals(kEntryID, entryID)
 	return c.Next()
 }
 
@@ -118,8 +132,10 @@ func GetEntry(c *fiber.Ctx) error {
 	type Resp struct {
 		Entry *Entry `json:"entry"`
 	}
+
 	ctx := c.Context()
-	entryID := c.Locals("entry_id").(int64)
+	entryID := c.Locals(kEntryID).(int64)
+
 	entry, err := db.GetSidebarEntry(ctx, entryID)
 	if err != nil {
 		return err
@@ -127,10 +143,12 @@ func GetEntry(c *fiber.Ctx) error {
 	if entry == nil {
 		return fiber.ErrNotFound
 	}
+
 	subEntry, err := db.GetSidebarSubEntry(ctx, entry.ID, entry.ID)
 	if err != nil {
 		return err
 	}
+
 	return c.JSON(&Resp{
 		Entry: &Entry{
 			ID:            strconv.FormatInt(entry.ID, 10),
@@ -168,8 +186,9 @@ func PutEntry(c *fiber.Ctx) error {
 	type Resp struct {
 		Entry *Entry `json:"entry"`
 	}
+
 	ctx := c.Context()
-	entryID := c.Locals("entry_id").(int64)
+	entryID := c.Locals(kEntryID).(int64)
 
 	var req *Req
 	if err := c.BodyParser(&req); err != nil {
@@ -210,7 +229,9 @@ func PutEntry(c *fiber.Ctx) error {
 //	@Param			entry_id	path	string	true	"Entry ID"
 //	@Router			/api/sidebar/entries/{entry_id} [delete]
 func DeleteEntry(c *fiber.Ctx) error {
-	return nil
+	ctx := c.Context()
+	entryID := c.Locals(kEntryID).(int64)
+	return db.RemoveSidebarEntry(ctx, entryID)
 }
 
 // GetSubEntries
@@ -225,7 +246,39 @@ func GetSubEntries(c *fiber.Ctx) error {
 	type Resp struct {
 		SubEntries []*Entry `json:"sub_entries"`
 	}
-	return nil
+
+	ctx := c.Context()
+	parentID := c.Locals(kEntryID).(int64)
+	prevID := parentID
+	entries := []*queries.SidebarEntry{}
+	for {
+		entry, err := db.GetSidebarSubEntry(ctx, parentID, prevID)
+		if err != nil {
+			return err
+		}
+		if entry == nil {
+			break
+		}
+		entries = append(entries, entry)
+	}
+
+	respEntries := []*Entry{}
+	for _, entry := range entries {
+		subEntry, err := db.GetSidebarSubEntry(ctx, entry.ID, entry.ID)
+		if err != nil {
+			return err
+		}
+		respEntries = append(respEntries, &Entry{
+			ID:            strconv.FormatInt(entry.ID, 10),
+			Title:         entry.Title,
+			Type:          string(entry.Type),
+			HasSubEntries: subEntry != nil,
+		})
+	}
+
+	return c.JSON(&Resp{
+		SubEntries: respEntries,
+	})
 }
 
 // DuplicateEntry
@@ -254,5 +307,51 @@ func DuplicateEntry(c *fiber.Ctx) error {
 	type Resp struct {
 		Entry *Entry `json:"entry"`
 	}
-	return nil
+
+	ctx := c.Context()
+	entryID := c.Locals(kEntryID).(int64)
+
+	var req *Req
+	if err := c.BodyParser(&req); err != nil {
+		return err
+	}
+
+	parentID, prevID, err := parsePosition(req.Parent, req.PositionAfter)
+	if err != nil {
+		return err
+	}
+
+	args := &db.CreateSidebarEntryArgs{
+		Parent: parentID,
+		PrevID: prevID,
+	}
+
+	entry, err := db.GetSidebarEntry(ctx, entryID)
+	if err != nil {
+		return err
+	}
+	if entry == nil {
+		return ErrEntryNotExist
+	}
+
+	args.Type = entry.Type
+	if req.Title != "" {
+		args.Title = req.Title
+	} else {
+		args.Title = entry.Title
+	}
+
+	newEntry, err := db.CreateSidebarEntry(c.Context(), args)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(&Resp{
+		Entry: &Entry{
+			ID:            strconv.FormatInt(newEntry.ID, 10),
+			Title:         newEntry.Title,
+			Type:          string(newEntry.Type),
+			HasSubEntries: false,
+		},
+	})
 }
