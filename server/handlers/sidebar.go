@@ -260,6 +260,7 @@ func GetSubEntries(c *fiber.Ctx) error {
 			break
 		}
 		entries = append(entries, entry)
+		prevID = entry.ID
 	}
 
 	respEntries := []*Entry{}

@@ -11,6 +11,8 @@ CREATE TABLE sidebar_entries
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE UNIQUE INDEX uniq_sidebar_par_prev ON sidebar_entries (parent_id, prev_id);
+
 CREATE TABLE workspaces
 (
     id                    BIGSERIAL                NOT NULL PRIMARY KEY,

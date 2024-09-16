@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/import-ai/ai-know/server/config"
+	"github.com/import-ai/ai-know/server/db"
 	"github.com/import-ai/ai-know/server/routes"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -38,6 +40,10 @@ func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	log.Logger = log.With().Caller().Logger()
 	config.InitFromEnv()
+
+	if err := db.Init(context.Background()); err != nil {
+		log.Fatal().Err(err).Send()
+	}
 
 	app := fiber.New()
 	routes.RegisterRoutes(app)
