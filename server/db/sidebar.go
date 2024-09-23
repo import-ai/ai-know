@@ -157,6 +157,25 @@ func GetSidebarSubEntry(
 	return entry, err
 }
 
+func lockAllParents(
+	ctx context.Context, q *queries.Queries, parentID int64, entryID int64,
+) error {
+	for {
+		if parentID == entryID {
+			return ErrInvalidEntry
+		}
+		parent, err := q.LockSidebarEntry(ctx, parentID)
+		if err != nil {
+			return err
+		}
+		if !parent.ParentID.Valid {
+			break
+		}
+		parentID = parent.ParentID.Int64
+	}
+	return nil
+}
+
 func PutSidebarEntry(
 	ctx context.Context, args *PutSidebarEntryArgs,
 ) error {
@@ -186,9 +205,17 @@ func PutSidebarEntry(
 		if err != nil {
 			return err
 		}
+
+		if err := lockAllParents(
+			ctx, q, args.Parent, args.EntryID,
+		); err != nil {
+			return err
+		}
+
 		if err := removeSidebarSubEntry(ctx, q, entry); err != nil {
 			return err
 		}
+
 		if err := insertSidebarSubEntry(
 			ctx, q, args.EntryID, args.Parent, args.PrevID,
 		); err != nil {
