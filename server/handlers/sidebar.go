@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"strconv"
 
@@ -120,6 +121,28 @@ func ParseEntryID(c *fiber.Ctx) error {
 	return c.Next()
 }
 
+func getEntryByID(ctx context.Context, id int64) (*Entry, error) {
+	entry, err := db.GetSidebarEntry(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if entry == nil {
+		return nil, fiber.ErrNotFound
+	}
+
+	subEntry, err := db.GetSidebarSubEntry(ctx, entry.ID, entry.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Entry{
+		ID:            strconv.FormatInt(entry.ID, 10),
+		Title:         entry.Title,
+		Type:          string(entry.Type),
+		HasSubEntries: subEntry != nil,
+	}, nil
+}
+
 // GetEntry
 //
 //	@Summary		Get Entry
@@ -136,26 +159,13 @@ func GetEntry(c *fiber.Ctx) error {
 	ctx := c.Context()
 	entryID := c.Locals(kEntryID).(int64)
 
-	entry, err := db.GetSidebarEntry(ctx, entryID)
-	if err != nil {
-		return err
-	}
-	if entry == nil {
-		return fiber.ErrNotFound
-	}
-
-	subEntry, err := db.GetSidebarSubEntry(ctx, entry.ID, entry.ID)
+	entry, err := getEntryByID(ctx, entryID)
 	if err != nil {
 		return err
 	}
 
 	return c.JSON(&Resp{
-		Entry: &Entry{
-			ID:            strconv.FormatInt(entry.ID, 10),
-			Title:         entry.Title,
-			Type:          string(entry.Type),
-			HasSubEntries: subEntry != nil,
-		},
+		Entry: entry,
 	})
 }
 
@@ -218,7 +228,18 @@ func PutEntry(c *fiber.Ctx) error {
 		args.PrevID = args.Parent
 	}
 
-	return db.PutSidebarEntry(ctx, args)
+	if err := db.PutSidebarEntry(ctx, args); err != nil {
+		return err
+	}
+
+	entry, err := getEntryByID(ctx, entryID)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(&Resp{
+		Entry: entry,
+	})
 }
 
 // DeleteEntry
