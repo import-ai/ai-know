@@ -1,4 +1,5 @@
 import {
+  useDeleteApiSidebarEntriesEntryId,
   useGetApiSidebarEntriesEntryId,
   useGetApiSidebarEntriesEntryIdSubEntries,
   usePostApiSidebarEntries,
@@ -14,10 +15,14 @@ export const TestApi = () => {
   const { data: sidebarData } = useGetApiSidebarEntriesEntryId(privateId ?? '')
   const { data: subData, mutate: refreshData } =
     useGetApiSidebarEntriesEntryIdSubEntries(sidebarData?.data.entry?.id ?? '')
-  const { trigger: create, isMutating } = usePostApiSidebarEntries()
+  const { trigger: create, isMutating: isCreating } = usePostApiSidebarEntries()
   const [id2Update, setId2Update] = useState<string>('')
-  const { trigger: update } = usePutApiSidebarEntriesEntryId(id2Update ?? '')
+  const { trigger: update, isMutating: isUpdating } =
+    usePutApiSidebarEntriesEntryId(id2Update ?? '')
+  const { trigger: deleteEntity, isMutating: isDeleting } =
+    useDeleteApiSidebarEntriesEntryId(id2Update ?? '')
 
+  const isLoading = isCreating || isUpdating || isDeleting
   const createEntry = useCallback(() => {
     create({
       parent: sidebarData?.data.entry?.id,
@@ -38,12 +43,20 @@ export const TestApi = () => {
     })
   }, [id2Update, refreshData, update])
 
+  const deleteName = useCallback(() => {
+    if (!id2Update) return
+    deleteEntity().finally(() => {
+      setId2Update('')
+      refreshData()
+    })
+  }, [deleteEntity, id2Update, refreshData])
+
   return (
     <div className="relative">
       <div
         className={clsx(
           'absolute h-full w-full flex items-center justify-center bg-slate-400 bg-opacity-85',
-          { hidden: !isMutating },
+          { hidden: !isLoading },
         )}
       >
         <span className="loading loading-dots loading-xl"></span>
@@ -69,26 +82,37 @@ export const TestApi = () => {
         ))}
       </div>
 
-      <button className="btn" onClick={createEntry} disabled={isMutating}>
-        add a sub
-      </button>
-      <button
-        className="btn"
-        onClick={() => {
-          updateName()
-        }}
-      >
-        update
-      </button>
-      <input
-        type="text"
-        placeholder="Type here"
-        className="input input-bordered w-full max-w-xs"
-        value={id2Update}
-        onChange={(e) => {
-          setId2Update(e.target.value)
-        }}
-      />
+      <div className="gap-2 flex">
+        <button className="btn" onClick={createEntry} disabled={isLoading}>
+          add a sub
+        </button>
+        <button
+          className="btn"
+          onClick={() => {
+            updateName()
+          }}
+        >
+          update
+        </button>
+        <button
+          className="btn"
+          onClick={() => {
+            deleteName()
+          }}
+        >
+          delete
+        </button>
+
+        <input
+          type="text"
+          placeholder="Type here"
+          className="input input-bordered w-full max-w-xs"
+          value={id2Update}
+          onChange={(e) => {
+            setId2Update(e.target.value)
+          }}
+        />
+      </div>
     </div>
   )
 }
