@@ -1,14 +1,13 @@
 import {
   useGetApiSidebarEntriesEntryId,
   useGetApiSidebarEntriesEntryIdSubEntries,
-  useGetApiWorkspace,
   usePostApiSidebarEntries,
   usePutApiSidebarEntriesEntryId,
 } from '@/api'
 import { usePrivateEnties } from '@/hooks/workspace'
 import clsx from 'clsx'
 import dayjs from 'dayjs'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 export const TestApi = () => {
   const privateId = usePrivateEnties()
@@ -56,7 +55,13 @@ export const TestApi = () => {
       <div className="m-3">
         <h1>{sidebarData?.data.entry?.title}</h1>
         {subData?.data.sub_entries?.map((sub) => (
-          <div key={sub.id} className="ml-2">
+          <div
+            key={sub.id}
+            className="ml-2"
+            onClick={() => {
+              setId2Update(sub.id ?? '')
+            }}
+          >
             <h2>
               {sub.title} /id:{sub.id}
             </h2>
@@ -79,6 +84,7 @@ export const TestApi = () => {
         type="text"
         placeholder="Type here"
         className="input input-bordered w-full max-w-xs"
+        value={id2Update}
         onChange={(e) => {
           setId2Update(e.target.value)
         }}
