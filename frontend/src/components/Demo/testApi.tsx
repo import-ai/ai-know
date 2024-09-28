@@ -3,11 +3,12 @@ import {
   useGetApiSidebarEntriesEntryIdSubEntries,
   useGetApiWorkspace,
   usePostApiSidebarEntries,
+  usePutApiSidebarEntriesEntryId,
 } from '@/api'
 import { usePrivateEnties } from '@/hooks/workspace'
 import clsx from 'clsx'
 import dayjs from 'dayjs'
-import { useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 export const TestApi = () => {
   const privateId = usePrivateEnties()
@@ -15,6 +16,9 @@ export const TestApi = () => {
   const { data: subData, mutate: refreshData } =
     useGetApiSidebarEntriesEntryIdSubEntries(sidebarData?.data.entry?.id ?? '')
   const { trigger: create, isMutating } = usePostApiSidebarEntries()
+  const [id2Update, setId2Update] = useState<string>('')
+  const { trigger: update } = usePutApiSidebarEntriesEntryId(id2Update ?? '')
+
   const createEntry = useCallback(() => {
     create({
       parent: sidebarData?.data.entry?.id,
@@ -24,6 +28,16 @@ export const TestApi = () => {
       refreshData()
     })
   }, [create, refreshData, sidebarData?.data.entry?.id])
+
+  const updateName = useCallback(() => {
+    if (!id2Update) return
+    update({
+      title: 'updated ' + dayjs().format('YYYY-MM-DD HH:mm:ss'),
+    }).finally(() => {
+      setId2Update('')
+      refreshData()
+    })
+  }, [id2Update, refreshData, update])
 
   return (
     <div className="relative">
@@ -53,6 +67,22 @@ export const TestApi = () => {
       <button className="btn" onClick={createEntry} disabled={isMutating}>
         add a sub
       </button>
+      <button
+        className="btn"
+        onClick={() => {
+          updateName()
+        }}
+      >
+        update
+      </button>
+      <input
+        type="text"
+        placeholder="Type here"
+        className="input input-bordered w-full max-w-xs"
+        onChange={(e) => {
+          setId2Update(e.target.value)
+        }}
+      />
     </div>
   )
 }
