@@ -8,12 +8,17 @@ import '@blocksuite/presets/themes/affine.css'
 import { EditorProvider } from '@/providers/EditorProvider'
 import { DevTools } from 'jotai-devtools'
 import 'jotai-devtools/styles.css'
+import { TestApi } from '@/components/Demo/testApi'
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <Root />,
     children: [
+      {
+        path: 'demo',
+        element:<TestApi/>
+      },
       {
         path: 'article/:id',
         element: <Article />,

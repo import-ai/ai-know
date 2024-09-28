@@ -9,5 +9,9 @@
     "strict": true,
     "noEmit": true
   },
-  "include": ["vite.config.ts"]
+  "include": [
+    "vite.config.ts",
+    "orval.config.ts",
+    "env.d.ts"
+  ]
 }
