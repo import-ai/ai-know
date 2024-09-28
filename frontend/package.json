@@ -19,6 +19,7 @@
     "react-router-dom": "^6.26.0",
     "react-sortablejs": "^6.1.4",
     "sortablejs": "^1.15.2",
+    "swr": "^2.2.5",
     "yjs": "^13.6.18"
   },
   "devDependencies": {
