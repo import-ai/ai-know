@@ -6,7 +6,7 @@ export default defineConfig({
     output: {
       mode: 'tags-split',
       workspace: 'src/api',
-      // target: 'src/api/',
+      target: '',
       schemas: 'model',
       client: 'swr',
       httpClient:'axios',
