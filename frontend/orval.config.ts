@@ -5,10 +5,12 @@ export default defineConfig({
   'ai-know': {
     output: {
       mode: 'tags-split',
-      target: './src/api.ts',
-      schemas: 'src/model',
+      workspace: 'src/api',
+      // target: 'src/api/',
+      schemas: 'src/api/model',
       client: 'swr',
-      mock: true,
+      httpClient:'axios',
+      mock: false,
     },
     input: {
       target: './doc.json',
