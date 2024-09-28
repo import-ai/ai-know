@@ -3965,6 +3965,7 @@ __metadata:
     "@vitejs/plugin-react-swc": "npm:^3.5.0"
     autoprefixer: "npm:^10.4.20"
     axios: "npm:^1.7.7"
+    clsx: "npm:^2.1.1"
     daisyui: "npm:^4.12.10"
     dayjs: "npm:^1.11.13"
     eslint: "npm:^8.57.0"
