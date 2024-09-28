@@ -1,4 +1,4 @@
-import { defineConfig } from 'orval';
+import { defineConfig } from 'orval'
 
 // http://ddns.ip.lucien.ink:8911/swagger/doc.json
 export default defineConfig({
@@ -9,11 +9,14 @@ export default defineConfig({
       target: '',
       schemas: 'model',
       client: 'swr',
-      httpClient:'axios',
+      httpClient: 'axios',
       mock: false,
     },
     input: {
       target: './doc.json',
     },
+    hooks: {
+      afterAllFilesWrite: 'prettier --write',
+    },
   },
-});
+})
