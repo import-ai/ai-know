@@ -24,12 +24,12 @@
  * OpenAPI spec version: 1.0
  */
 
-export type HandlersEntryType = typeof HandlersEntryType[keyof typeof HandlersEntryType];
-
+export type HandlersEntryType =
+  (typeof HandlersEntryType)[keyof typeof HandlersEntryType]
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const HandlersEntryType = {
   note: 'note',
   group: 'group',
   link: 'link',
-} as const;
+} as const

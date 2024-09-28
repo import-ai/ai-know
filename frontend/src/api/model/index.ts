@@ -24,15 +24,15 @@
  * OpenAPI spec version: 1.0
  */
 
-export * from './handlersCreateEntryReq';
-export * from './handlersCreateEntryResp';
-export * from './handlersDuplicateEntryReq';
-export * from './handlersDuplicateEntryResp';
-export * from './handlersEntries';
-export * from './handlersEntry';
-export * from './handlersEntryType';
-export * from './handlersGetEntryResp';
-export * from './handlersGetSubEntriesResp';
-export * from './handlersGetWorkspaceResp';
-export * from './handlersPutEntryReq';
-export * from './handlersPutEntryResp';
+export * from './handlersCreateEntryReq'
+export * from './handlersCreateEntryResp'
+export * from './handlersDuplicateEntryReq'
+export * from './handlersDuplicateEntryResp'
+export * from './handlersEntries'
+export * from './handlersEntry'
+export * from './handlersEntryType'
+export * from './handlersGetEntryResp'
+export * from './handlersGetSubEntriesResp'
+export * from './handlersGetWorkspaceResp'
+export * from './handlersPutEntryReq'
+export * from './handlersPutEntryResp'

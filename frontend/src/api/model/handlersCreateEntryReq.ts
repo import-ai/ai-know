@@ -25,8 +25,8 @@
  */
 
 export interface HandlersCreateEntryReq {
-  parent?: string;
-  position_after?: string;
-  title?: string;
-  type?: string;
+  parent?: string
+  position_after?: string
+  title?: string
+  type?: string
 }

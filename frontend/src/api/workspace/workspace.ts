@@ -23,58 +23,54 @@
 调用`Update Entry`，更新`entry`的`parent`和`position`。
  * OpenAPI spec version: 1.0
  */
-import * as axios from 'axios';
-import type {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios'
+import * as axios from 'axios'
+import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
 import useSwr from 'swr'
-import type {
-  Key,
-  SWRConfiguration
-} from 'swr'
-import type {
-  HandlersGetWorkspaceResp
-} from '.././model'
+import type { Key, SWRConfiguration } from 'swr'
+import type { HandlersGetWorkspaceResp } from '.././model'
 
-
-  
-  /**
+/**
  * Get properties of current workspace.
  * @summary Get Workspace
  */
 export const getApiWorkspace = (
-     options?: AxiosRequestConfig
- ): Promise<AxiosResponse<HandlersGetWorkspaceResp>> => {
-    return axios.default.get(
-      `/api/workspace`,options
-    );
-  }
+  options?: AxiosRequestConfig,
+): Promise<AxiosResponse<HandlersGetWorkspaceResp>> => {
+  return axios.default.get(`/api/workspace`, options)
+}
 
+export const getGetApiWorkspaceKey = () => [`/api/workspace`] as const
 
-
-export const getGetApiWorkspaceKey = () => [`/api/workspace`] as const;
-
-export type GetApiWorkspaceQueryResult = NonNullable<Awaited<ReturnType<typeof getApiWorkspace>>>
+export type GetApiWorkspaceQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getApiWorkspace>>
+>
 export type GetApiWorkspaceQueryError = AxiosError<unknown>
 
 /**
  * @summary Get Workspace
  */
-export const useGetApiWorkspace = <TError = AxiosError<unknown>>(
-   options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof getApiWorkspace>>, TError> & { swrKey?: Key, enabled?: boolean }, axios?: AxiosRequestConfig }
-) => {
-  const {swr: swrOptions, axios: axiosOptions} = options ?? {}
+export const useGetApiWorkspace = <TError = AxiosError<unknown>>(options?: {
+  swr?: SWRConfiguration<
+    Awaited<ReturnType<typeof getApiWorkspace>>,
+    TError
+  > & { swrKey?: Key; enabled?: boolean }
+  axios?: AxiosRequestConfig
+}) => {
+  const { swr: swrOptions, axios: axiosOptions } = options ?? {}
 
   const isEnabled = swrOptions?.enabled !== false
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getGetApiWorkspaceKey() : null);
+  const swrKey =
+    swrOptions?.swrKey ?? (() => (isEnabled ? getGetApiWorkspaceKey() : null))
   const swrFn = () => getApiWorkspace(axiosOptions)
 
-  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(
+    swrKey,
+    swrFn,
+    swrOptions,
+  )
 
   return {
     swrKey,
-    ...query
+    ...query,
   }
 }

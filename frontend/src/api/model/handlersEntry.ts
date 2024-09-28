@@ -23,11 +23,11 @@
 调用`Update Entry`，更新`entry`的`parent`和`position`。
  * OpenAPI spec version: 1.0
  */
-import type { HandlersEntryType } from './handlersEntryType';
+import type { HandlersEntryType } from './handlersEntryType'
 
 export interface HandlersEntry {
-  has_sub_entries?: boolean;
-  id?: string;
-  title?: string;
-  type?: HandlersEntryType;
+  has_sub_entries?: boolean
+  id?: string
+  title?: string
+  type?: HandlersEntryType
 }

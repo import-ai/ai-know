@@ -23,8 +23,8 @@
 调用`Update Entry`，更新`entry`的`parent`和`position`。
  * OpenAPI spec version: 1.0
  */
-import type { HandlersEntry } from './handlersEntry';
+import type { HandlersEntry } from './handlersEntry'
 
 export interface HandlersDuplicateEntryResp {
-  entry?: HandlersEntry;
+  entry?: HandlersEntry
 }

@@ -25,7 +25,7 @@
  */
 
 export interface HandlersDuplicateEntryReq {
-  parent?: string;
-  position_after?: string;
-  title?: string;
+  parent?: string
+  position_after?: string
+  title?: string
 }

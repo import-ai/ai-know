@@ -25,6 +25,6 @@
  */
 
 export interface HandlersEntries {
-  private?: string;
-  team?: string;
+  private?: string
+  team?: string
 }
