@@ -45,7 +45,12 @@ func main() {
 		log.Fatal().Err(err).Send()
 	}
 
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		ErrorHandler: func(c *fiber.Ctx, err error) error {
+			log.Err(err).Msg("http error")
+			return fiber.DefaultErrorHandler(c, err)
+		},
+	})
 	routes.RegisterRoutes(app)
 	if err := app.Listen(config.ListenAddr()); err != nil {
 		log.Fatal().Err(err).Send()

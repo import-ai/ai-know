@@ -6,18 +6,23 @@ import (
 
 	"github.com/import-ai/ai-know/server/sql/queries"
 	"github.com/jackc/pgx/v5"
+	"github.com/rs/zerolog/log"
 )
 
 func GetWorkspace(ctx context.Context, id int64) (*queries.Workspace, error) {
+	log.Info().Int64("workspace_id", id).Send()
 	workspace, err := newQueries().GetWorkspace(ctx, id)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
+	}
+	if err != nil {
+		log.Err(err).Send()
 	}
 	return workspace, err
 }
 
 func CreateFirstWorkspace(ctx context.Context) (*queries.Workspace, error) {
-	tx, err := conn.Begin(ctx)
+	tx, err := connPool.Begin(ctx)
 	if err != nil {
 		return nil, err
 	}

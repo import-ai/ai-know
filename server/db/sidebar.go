@@ -105,7 +105,7 @@ func removeSidebarSubEntry(
 func CreateSidebarEntry(
 	ctx context.Context, args *CreateSidebarEntryArgs,
 ) (*queries.SidebarEntry, error) {
-	tx, err := conn.Begin(ctx)
+	tx, err := connPool.Begin(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +179,7 @@ func lockAllParents(
 func PutSidebarEntry(
 	ctx context.Context, args *PutSidebarEntryArgs,
 ) error {
-	tx, err := conn.Begin(ctx)
+	tx, err := connPool.Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -227,7 +227,7 @@ func PutSidebarEntry(
 }
 
 func RemoveSidebarEntry(ctx context.Context, id int64) error {
-	tx, err := conn.Begin(ctx)
+	tx, err := connPool.Begin(ctx)
 	if err != nil {
 		return err
 	}

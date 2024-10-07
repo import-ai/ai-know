@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/swagger"
 	_ "github.com/import-ai/ai-know/server/docs"
 	"github.com/import-ai/ai-know/server/handlers"
@@ -24,6 +25,7 @@ func registerSidebarAPI(router fiber.Router) {
 
 func RegisterRoutes(router fiber.Router) {
 	router.Use(middlewares.NewRecovery())
+	router.Use(logger.New())
 
 	router.Get("/swagger/*", swagger.HandlerDefault)
 	router.Route("/api", func(router fiber.Router) {

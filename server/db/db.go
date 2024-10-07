@@ -6,10 +6,10 @@ import (
 
 	"github.com/import-ai/ai-know/server/config"
 	"github.com/import-ai/ai-know/server/sql/queries"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var conn *pgx.Conn
+var connPool *pgxpool.Pool
 
 func Init(ctx context.Context) error {
 	dsn := config.DataSourceName()
@@ -17,14 +17,15 @@ func Init(ctx context.Context) error {
 		return errors.New("Data Source Name is empty")
 	}
 	var err error
-	conn, err = pgx.Connect(ctx, dsn)
+	connPool, err = pgxpool.New(ctx, dsn)
 	return err
 }
 
 func Close(ctx context.Context) error {
-	return conn.Close(ctx)
+	connPool.Close()
+	return nil
 }
 
 func newQueries() *queries.Queries {
-	return queries.New(conn)
+	return queries.New(connPool)
 }
