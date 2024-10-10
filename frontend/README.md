@@ -11,4 +11,11 @@
 2. `api:gen-swagger` - to generate swr hooks and ts types
 
 ## misc
-1. [fnm](https://github.com/Schniz/fnm) is  recommended
+1. [fnm](https://github.com/Schniz/fnm) is recommended
+1. [fubukicss for figma](https://github.com/zouhangwithsweet/fubukicss-tool) is recommended
+
+## links
+
+### figma design
+https://www.figma.com/design/xqzxayqV4HG4xhLLk8DMms/AI-KNOW?node-id=1-96&node-type=frame&t=TpScIWuDnd8aujHe-0
+

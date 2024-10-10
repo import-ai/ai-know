@@ -1,4 +1,5 @@
 import {
+  HandlersEntryType,
   useDeleteApiSidebarEntriesEntryId,
   useGetApiSidebarEntriesEntryId,
   useGetApiSidebarEntriesEntryIdSubEntries,
@@ -26,7 +27,7 @@ export const TestApi = () => {
   const createEntry = useCallback(() => {
     create({
       parent: sidebarData?.data.entry?.id,
-      type: 'note',
+      type: HandlersEntryType.note,
       title: 'new sub ' + dayjs().format('YYYY-MM-DD HH:mm:ss'),
     }).finally(() => {
       refreshData()
