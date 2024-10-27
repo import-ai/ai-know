@@ -7,11 +7,10 @@ from typing import List, AsyncIterator
 from fastapi import FastAPI, Request, status, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
-from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, Field
+from sse_starlette import EventSourceResponse
 
 from core.config import load_config, Config
-from core.entity.api import ChatRequest
+from core.entity.api import ChatRequest, InsertRequest
 from core.entity.retrieve.chunk import Chunk
 from core.entity.trace_info import TraceInfo
 from core.ingestion import split_markdown
@@ -24,11 +23,6 @@ start_time: datetime = datetime.now()
 config: Config = load_config()
 logger = get_logger(__name__)
 pipeline: Pipeline
-
-
-class InsertRequest(BaseModel):
-    title: str = Field(description="Document title")
-    content: str = Field(description="Document content")
 
 
 def init():
@@ -71,8 +65,6 @@ v1 = APIRouter(prefix="/api/v1")
 async def create_or_update(namespace: str, element_id: str, request: InsertRequest):
     pipeline.retriever.vector_db.remove(namespace, element_id)
     chunk_list: List[Chunk] = split_markdown(namespace, element_id, request.title, request.content)
-    for chunk in chunk_list:
-        chunk.namespace = namespace
     pipeline.retriever.vector_db.insert(chunk_list)
 
 
@@ -100,7 +92,7 @@ async def v1_stream(p: Pipeline, request: ChatRequest) -> AsyncIterator[str]:
 
 @v1.post("/stream")
 async def api_v1_stream(request: ChatRequest):
-    return StreamingResponse(v1_stream(pipeline, request), media_type="text/event-stream")
+    return EventSourceResponse(v1_stream(pipeline, request))
 
 
 # healthcheck

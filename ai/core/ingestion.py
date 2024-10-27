@@ -33,6 +33,9 @@ def split_markdown(namespace: str, element_id: str, title: str, markdown_text: s
             if current_level > 0:
                 chunk_stack.append(chunk)
 
+            if lineno == len(lines) and previous_lineno == 0:  # 如果当前 chunk 是整个全文，为避免重复，遂跳过
+                continue
+
             chunk_list.append(chunk)
             previous_lineno = lineno
 
