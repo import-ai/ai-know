@@ -10,15 +10,15 @@ def line_level(line: str) -> int:
 def split_markdown(namespace: str, element_id: str, title: str, markdown_text: str) -> List[Chunk]:
     common_info = {"element_id": element_id, "namespace": namespace, "title": title}
     lines: List[str] = markdown_text.split('\n')
-    title = Chunk(text=title, chunk_type=ChunkType.title, **common_info)
-    body = Chunk(text=markdown_text, chunk_type=ChunkType.doc, start_lineno=0, end_lineno=len(lines), **common_info)
-    chunk_list: List[Chunk] = [title, body]
+    body = Chunk(text=f"title: {title}\n" + markdown_text, chunk_type=ChunkType.doc,
+                 start_lineno=0, end_lineno=len(lines), **common_info)
+    chunk_list: List[Chunk] = [body]
     chunk_stack: List[Chunk] = []
     previous_lineno: int = 0
     for lineno, line in enumerate(lines + ["#"]):  # Add a "#" to make program handle last part without special check.
         if line.startswith('#'):
             chunk = Chunk(
-                text='\n'.join(lines[previous_lineno:lineno]).strip(),
+                text='\n'.join([f"title: {title}"] + lines[previous_lineno:lineno]).strip(),
                 chunk_type=ChunkType.section,
                 start_lineno=previous_lineno,
                 end_lineno=lineno,

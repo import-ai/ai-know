@@ -17,8 +17,7 @@ class Pipeline(BaseRunner):
 
     async def astream(self, trace_info: TraceInfo, request: ChatRequest = ...,
                       *args, **kwargs) -> AsyncIterator[ChatBaseResponse]:
-        retrieval_list: List[TextRetrieval] = await self.retriever.ainvoke(
-            trace_info, request.namespace, request.query, 3)
+        retrieval_list: List[TextRetrieval] = await self.retriever.ainvoke(trace_info, request, 3)
         async for delta in self.rag.astream(request.query, retrieval_list):
             yield ChatDeltaResponse(delta=delta)
 

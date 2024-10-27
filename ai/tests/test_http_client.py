@@ -1,14 +1,13 @@
 import tempfile
-from typing import AsyncIterator
+from typing import AsyncIterator, List
 
 import pytest
 import requests
 from sseclient import SSEClient
 
 from core.entity.api import ChatRequest, InsertRequest
-from tests.test_local_client import assert_stream
-
-namespace: str = "test"
+from test_local_client import query_test_case
+from tests.test_local_client import assert_stream, create_test_case
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -50,15 +49,14 @@ async def stream(reqeust: ChatRequest) -> AsyncIterator[str]:
         yield event.data
 
 
-def test_create_index():
-    request = InsertRequest(title="下周计划", content="+ 9:00 起床\n+ 10:00 上班")
-    response = requests.put(f"http://localhost:8000/api/v1/index/{namespace}/a", json=request.model_dump())
+@pytest.mark.parametrize(*create_test_case)
+def test_create_index(namespace: str, element_id: str, title: str, content: str):
+    request = InsertRequest(title=title, content=content)
+    response = requests.put(f"http://localhost:8000/api/v1/index/{namespace}/{element_id}", json=request.model_dump())
     response.raise_for_status()
 
 
-@pytest.mark.parametrize("query", [
-    "下周有什么计划"
-])
-async def test_stream(query: str):
-    request = ChatRequest(session_id="fake_id", namespace=namespace, query=query)
+@pytest.mark.parametrize(*query_test_case)
+async def test_stream(namespace: str, query: str, element_id_list: List[str]):
+    request = ChatRequest(session_id="fake_id", namespace=namespace, query=query, element_id_list=element_id_list)
     await assert_stream(stream(request))
