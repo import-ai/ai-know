@@ -1,7 +1,7 @@
-import logging
-from datetime import datetime
 import json
+import logging
 import traceback
+from datetime import datetime
 
 
 class CustomFormatter(logging.Formatter):
@@ -27,7 +27,7 @@ class CustomFormatter(logging.Formatter):
         str_log = json.dumps(log, ensure_ascii=False, separators=(',', ':'))
         if (length := len(str_log)) > 65535:
             log = {
-                "error": "logging message too long",
+                "error": "logging entity too long",
                 "length": length,
                 "traceback": ''.join(traceback.format_list(traceback.extract_stack()))
             }

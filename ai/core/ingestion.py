@@ -1,6 +1,6 @@
-from core.entity import Chunk, ChunkType
 from typing import List
-from pydantic import ValidationError
+
+from core.entity.retrieve.chunk import Chunk, ChunkType
 
 
 def line_level(line: str) -> int:

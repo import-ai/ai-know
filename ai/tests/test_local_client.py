@@ -1,14 +1,19 @@
-from main import init, stream_chat
 import json
+
 import pytest
 
+from app import v1_stream, dumps, pipeline
+from core.entity.api import ChatRequest
 
-@pytest.mark.skip
-def test_local_client():
-    init()
-    for each in stream_chat("怎么安装 CUDA 驱动"):
+
+@pytest.mark.parametrize("namespace, query", [
+    ("test", "怎么安装 CUDA 驱动")
+])
+async def test_local_client(namespace: str, query: str):
+    request = ChatRequest(session_id="fake_id", query=query, namespace=namespace)
+    async for each in v1_stream(pipeline, request):
         response = json.loads(each)
         if response["response_type"] == "delta":
-            print(response["content"], end="", flush=True)
+            print(response["delta"], end="", flush=True)
         elif response["response_type"] == "citation":
-            print(response["content"])
+            print("\n".join(["", "-" * 32, dumps(response["citation"])]))

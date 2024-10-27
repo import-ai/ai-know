@@ -5,7 +5,7 @@ from typing import Dict, Type
 import yaml
 from pydantic import BaseModel, Field
 
-from core.logger import get_logger
+from core.util.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -51,7 +51,7 @@ def dict_prefix_filter(prefix: str, data: dict) -> dict:
 
 def dfs(define: Type[BaseModel], env_dict: Dict[str, str]) -> dict:
     result = {}
-    for field_name, field_info in define.__fields__.items():
+    for field_name, field_info in define.model_fields.items():
         filtered_env_dict = dict_prefix_filter(field_name.upper(), env_dict)
         if "" in filtered_env_dict:
             assert len(filtered_env_dict) == 1, f"Conflict name: {field_name}"
@@ -59,6 +59,7 @@ def dfs(define: Type[BaseModel], env_dict: Dict[str, str]) -> dict:
             result[field_name] = field_info.annotation(value)
             continue
         if filtered_env_dict:
+            assert issubclass(field_info.annotation, BaseModel)
             result[field_name] = dfs(field_info.annotation, dict_prefix_filter("_", filtered_env_dict))
     return result
 
@@ -77,7 +78,7 @@ def load_from_env() -> Dict[str, str]:
 
 def load_from_cli() -> Dict[str, str]:
     parser = argparse.ArgumentParser()
-    for name, field in Config.__fields__.items():
+    for name, field in Config.model_fields.items():
         parser.add_argument(
             f"--{name}",
             dest=name,
@@ -96,3 +97,6 @@ def load_config() -> Config:
     cli_config: Dict[str, str] = load_from_cli()
     config_merge: Dict[str, str] = {**yaml_config, **env_config, **cli_config}
     return Config.model_validate(config_merge)
+
+
+__all__ = [Config, load_config, OpenAIConfig, VectorDBConfig, RankerConfig]

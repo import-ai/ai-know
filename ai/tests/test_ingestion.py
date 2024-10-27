@@ -1,5 +1,3 @@
-import pytest
-
 from core.ingestion import split_markdown
 
 

@@ -1,19 +1,19 @@
 import pathlib
-from typing import List
+from typing import List, Tuple
 
 import pytest
 
-from core.retriever.embedding import VectorDB
-from core.entity import Chunk, Retrieval, ChunkType
+from core.retriever.vector_db import VectorDB
+from core.entity.retrieve.chunk import Chunk, TextRetrieval, ChunkType
 
 
 @pytest.fixture()
 def db(tmp_path: pathlib.Path) -> VectorDB:
     db = VectorDB(str(tmp_path), "BAAI/bge-m3", "cpu")
     db.insert([
-        Chunk(doc_id="a", text="apple", chunk_type=ChunkType.keyword),
-        Chunk(doc_id="a", text="car", chunk_type=ChunkType.keyword),
-        Chunk(doc_id="b", text="snake", chunk_type=ChunkType.keyword)
+        Chunk(doc_id="a", text="apple", chunk_type=ChunkType.keyword, namespace="default"),
+        Chunk(doc_id="a", text="car", chunk_type=ChunkType.keyword, namespace="default"),
+        Chunk(doc_id="b", text="snake", chunk_type=ChunkType.keyword, namespace="default")
     ])
     yield db
 
@@ -24,10 +24,10 @@ def db(tmp_path: pathlib.Path) -> VectorDB:
     ("chunk_type", 3, 0, "snake", "b")
 ])
 def test_db_query(db: VectorDB, query: str, k: int, rank: int, expected_text: str, expected_doc_id: str):
-    result_list: List[Retrieval] = db.query(query, k)
+    result_list: List[Tuple[Chunk, float]] = db.query(query, k)
     assert len(result_list) == k
-    assert result_list[rank].chunk.text == expected_text
-    assert result_list[rank].chunk.doc_id == expected_doc_id
+    assert result_list[rank][0].text == expected_text
+    assert result_list[rank][0].doc_id == expected_doc_id
 
 
 @pytest.mark.parametrize("doc_id, expected_count", [("a", 1), ("b", 2)])
