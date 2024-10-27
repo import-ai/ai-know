@@ -17,7 +17,8 @@ class ChunkType(str, Enum):
 
 
 class Chunk(BaseModel):
-    doc_id: str = Field(description="ID of note")
+    title: str
+    element_id: str
     text: str = Field(description="Chunk content")
     chunk_type: ChunkType = Field(description="Chunk type")
 
@@ -44,7 +45,7 @@ class TextRetrieval(BaseRetrieval):
 
     def to_reference(self) -> Reference:
         return Reference(
-            title="",
+            title=self.chunk.title,
             snippet=self.chunk.text,
-            link=""
+            link=f"{self.chunk.element_id}[{self.chunk.start_lineno}:{self.chunk.end_lineno}]"
         )

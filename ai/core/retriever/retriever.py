@@ -15,9 +15,9 @@ class Retriever(BaseRunner):
         self.vector_db = VectorDB(**vector_db_config.model_dump())
         self.ranker = Ranker(**ranker_config.model_dump())
 
-    async def ainvoke(self, trace_info: TraceInfo, query: str = None, k: int = 3,
+    async def ainvoke(self, trace_info: TraceInfo, namespace: str = ..., query: str = ..., k: int = 3,
                       threshold: Optional[float] = None) -> List[TextRetrieval]:
-        recall_result_list: List[Tuple[Chunk, float]] = self.vector_db.query(query, k << 2)
+        recall_result_list: List[Tuple[Chunk, float]] = self.vector_db.query(namespace, query, k << 2)
         rank_result: List[Tuple[int, float]] = self.ranker.rank(query, [c.text for c, _ in recall_result_list])
 
         retrieval_list: List[TextRetrieval] = [

@@ -67,11 +67,18 @@ async def exception_handler(_: Request, e: Exception) -> Response:
 v1 = APIRouter(prefix="/api/v1")
 
 
-@v1.put("/index/{doc_id}", response_model=None)
-async def create_or_update(doc_id: str, request: InsertRequest):
-    pipeline.retriever.vector_db.remove(doc_id)
-    chunk_list: List[Chunk] = split_markdown(doc_id, request.title, request.content)
+@v1.put("/index/{namespace}/{element_id}", response_model=None)
+async def create_or_update(namespace: str, element_id: str, request: InsertRequest):
+    pipeline.retriever.vector_db.remove(namespace, element_id)
+    chunk_list: List[Chunk] = split_markdown(namespace, element_id, request.title, request.content)
+    for chunk in chunk_list:
+        chunk.namespace = namespace
     pipeline.retriever.vector_db.insert(chunk_list)
+
+
+@v1.delete("/index/{namespace}/{element_id}", response_model=None)
+async def delete(namespace: str, element_id: str):
+    pipeline.retriever.vector_db.remove(namespace, element_id)
 
 
 async def v1_stream(p: Pipeline, request: ChatRequest) -> AsyncIterator[str]:

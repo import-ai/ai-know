@@ -18,7 +18,7 @@ class VectorDB:
         )
         self.batch_size: int = batch_size
 
-    async def insert(self, chunk_list: List[Chunk]):
+    def insert(self, chunk_list: List[Chunk]):
         for i in range(0, len(chunk_list), self.batch_size):
             batch: List[Chunk] = chunk_list[i:i + self.batch_size]
             self.collection.add(
@@ -27,11 +27,15 @@ class VectorDB:
                 metadatas=[c.metadata for c in batch]
             )
 
-    def remove(self, doc_id: str):
-        self.collection.delete(where={"doc_id": doc_id})
+    def remove(self, namespace: str, element_id: str):
+        self.collection.delete(where={"$and": [{"namespace": namespace}, {"element_id": element_id}]})
 
-    def query(self, query: str, k: int) -> List[Tuple[Chunk, float]]:
-        batch_result_list: chromadb.QueryResult = self.collection.query(query_texts=[query], n_results=k)
+    def query(self, namespace: str, query: str, k: int, element_id_list: List[str] = None) -> List[Tuple[Chunk, float]]:
+        where = {"namespace": namespace}
+        if element_id_list is not None:
+            where = {"$and": [where, {"element_id": {"$in": element_id_list}}]}
+
+        batch_result_list: chromadb.QueryResult = self.collection.query(query_texts=[query], n_results=k, where=where)
         result_list: List[Tuple[Chunk, float]] = []
         for chunk_id, document, metadata, distance in zip(
                 batch_result_list["ids"][0],

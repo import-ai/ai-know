@@ -15,9 +15,9 @@ class Pipeline(BaseRunner):
         self.retriever: Retriever = Retriever(config.vector_db, config.ranker)
         self.rag: RAG = RAG(config.openai)
 
-    async def astream(self, trace_info: TraceInfo, request: ChatRequest = None, *args, **kwargs) -> AsyncIterator[dict]:
-        query = request.query
-        retrieval_list: List[TextRetrieval] = await self.retriever.ainvoke(trace_info, query, 3)
-        async for delta in self.rag.astream(query, retrieval_list):
+    async def astream(self, trace_info: TraceInfo, request: ChatRequest = ..., *args, **kwargs) -> AsyncIterator[dict]:
+        retrieval_list: List[TextRetrieval] = await self.retriever.ainvoke(
+            trace_info, request.namespace, request.query, 3)
+        async for delta in self.rag.astream(request.query, retrieval_list):
             yield {"response_type": "delta", "delta": delta}
         yield {"response_type": "citation", "citation": [r.to_reference() for r in retrieval_list]}
