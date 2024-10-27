@@ -1,5 +1,5 @@
-from core.retriever.ranker import Ranker
 from core.config import Config, load_config
+from core.retriever.ranker import Ranker
 
 
 def test_common_ranker():

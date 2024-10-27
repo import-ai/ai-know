@@ -1,5 +1,3 @@
-import pytest
-
 from core.ingestion import split_markdown
 
 
@@ -14,7 +12,7 @@ More text
 ## Level 2
 Last part"""
 
-    chunk_list = split_markdown("id", "title", markdown_text)
+    chunk_list = split_markdown("ns", "id", "title", markdown_text)
     offset: int = 2
     assert len(chunk_list) == offset + 6
     for i in range(offset + 1):
@@ -25,3 +23,9 @@ Last part"""
         assert chunk_list[i + offset].parent_chunk_id == chunk_list[1 + offset].chunk_id
     for i in [5]:
         assert chunk_list[i + offset].parent_chunk_id == chunk_list[4 + offset].chunk_id
+
+
+def test_pure_text():
+    markdown_text = """Some ideals"""
+    chunk_list = split_markdown("ns", "id", "title", markdown_text)
+    assert len(chunk_list) == 2

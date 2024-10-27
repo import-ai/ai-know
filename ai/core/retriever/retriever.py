@@ -2,19 +2,28 @@ from typing import List, Tuple
 from typing import Optional
 
 from core.config import VectorDBConfig, RankerConfig
-from core.entity import Retrieval
-from .ranker import Ranker
-from .vector_db import VectorDB
+from core.entity.api import ChatRequest
+from core.entity.retrieve.chunk import Chunk, TextRetrieval
+from core.entity.retrieve.retrieval import Score
+from core.entity.trace_info import TraceInfo
+from core.retriever.ranker import Ranker
+from core.retriever.vector_db import VectorDB
+from core.runner.base import BaseRunner
 
 
-class Retriever:
+class Retriever(BaseRunner):
     def __init__(self, vector_db_config: VectorDBConfig, ranker_config: RankerConfig):
         self.vector_db = VectorDB(**vector_db_config.model_dump())
         self.ranker = Ranker(**ranker_config.model_dump())
 
-    def query(self, query: str, k: int = 3, threshold: Optional[float] = None) -> List[Retrieval]:
-        retrieval_list: List[Retrieval] = self.vector_db.query(query, k << 2)
-        rank_result: List[Tuple[int, float]] = self.ranker.rank(query, [r.chunk.text for r in retrieval_list])
-        for i, score in rank_result:
-            retrieval_list[i].score = score
-        return [retrieval_list[i] for i, score in rank_result if threshold is None or score > threshold]
+    async def ainvoke(self, trace_info: TraceInfo, request: ChatRequest = ..., k: int = 3,
+                      threshold: Optional[float] = None) -> List[TextRetrieval]:
+        recall_result_list: List[Tuple[Chunk, float]] = self.vector_db.query(
+            request.namespace, request.query, k << 2, request.element_id_list)
+        rank_result: List[Tuple[int, float]] = self.ranker.rank(request.query, [c.text for c, _ in recall_result_list])
+
+        retrieval_list: List[TextRetrieval] = [
+            TextRetrieval(chunk=recall_result_list[i][0], score=Score(recall=recall_result_list[i][1], rerank=score))
+            for i, score in rank_result
+        ]
+        return [r for r in retrieval_list if threshold is None or r.score.rerank > threshold]
