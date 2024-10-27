@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 
-class Reference(BaseModel):
+class Citation(BaseModel):
     title: str
     snippet: str
     link: str
@@ -18,5 +18,5 @@ class BaseRetrieval(BaseModel):
     def to_prompt(self) -> str:
         raise NotImplementedError
 
-    def to_reference(self) -> Reference:
+    def to_citation(self) -> Citation:
         raise NotImplementedError

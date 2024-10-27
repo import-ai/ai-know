@@ -77,7 +77,7 @@ async def v1_stream(p: Pipeline, request: ChatRequest) -> AsyncIterator[str]:
     trace_info = TraceInfo(logger=logger.getChild(request.session_id))
     try:
         async for delta in p.astream(trace_info, request):
-            yield dumps(delta)
+            yield dumps(delta.model_dump())
     except Exception as e:
         yield dumps({
             "response_type": "error",

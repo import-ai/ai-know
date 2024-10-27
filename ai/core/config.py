@@ -95,7 +95,13 @@ def load_config() -> Config:
     env_config: Dict[str, str] = load_from_env()
     yaml_config: Dict[str, str] = load_from_config_file()
     cli_config: Dict[str, str] = load_from_cli()
-    config_merge: Dict[str, str] = {**yaml_config, **env_config, **cli_config}
+    config_merge: Dict[str, str] = yaml_config | env_config | cli_config
+    logger.debug({
+        "env_config": env_config,
+        "yaml_config": yaml_config,
+        "cli_config": cli_config,
+        "config_merge": config_merge
+    })
     return Config.model_validate(config_merge)
 
 

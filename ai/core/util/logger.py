@@ -3,6 +3,8 @@ import logging
 import traceback
 from datetime import datetime
 
+from core.util.env import ENV
+
 
 class CustomFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
@@ -44,7 +46,7 @@ handler = logging.StreamHandler()
 handler.setFormatter(formatter)
 
 logger.addHandler(handler)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.INFO if ENV.is_prod() else logging.DEBUG)
 
 
 def get_logger(name: str) -> logging.Logger:

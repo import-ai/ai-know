@@ -5,7 +5,7 @@ from typing import Optional, Literal
 import shortuuid
 from pydantic import BaseModel, Field
 
-from core.entity.retrieve.retrieval import BaseRetrieval, Reference
+from core.entity.retrieve.retrieval import BaseRetrieval, Citation
 
 
 class ChunkType(str, Enum):
@@ -37,14 +37,14 @@ class Chunk(BaseModel):
 
 
 class TextRetrieval(BaseRetrieval):
-    retrieval_type: Literal["text"]
+    retrieval_type: Literal["text"] = "text"
     chunk: Chunk
 
     def to_prompt(self) -> str:
         return self.chunk.text
 
-    def to_reference(self) -> Reference:
-        return Reference(
+    def to_citation(self) -> Citation:
+        return Citation(
             title=self.chunk.title,
             snippet=self.chunk.text,
             link=f"{self.chunk.element_id}[{self.chunk.start_lineno}:{self.chunk.end_lineno}]"
