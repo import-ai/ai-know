@@ -2,7 +2,7 @@ import json
 from contextlib import asynccontextmanager
 from datetime import datetime
 from functools import partial
-from typing import List, AsyncIterator
+from typing import List, AsyncIterator, Union
 
 from fastapi import FastAPI, Request, status, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse, Response
 from sse_starlette import EventSourceResponse
 
 from core.config import load_config, Config
-from core.entity.api import ChatRequest, InsertRequest
+from core.entity.api import ChatRequest, InsertRequest, ChatDeltaResponse, ChatCitationListResponse, ChatBaseResponse
 from core.entity.retrieve.chunk import Chunk
 from core.entity.trace_info import TraceInfo
 from core.ingestion import split_markdown
@@ -32,11 +32,19 @@ def init():
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    init()
+    # init()
     yield
 
 
-app = FastAPI(lifespan=lifespan, title="AI Know", description="")
+app = FastAPI(lifespan=lifespan, title="AI Know", description="""## Description
+
++ **Index**: user's element, like text, url, photo, etc.
++ **LLM**: QA
+
+## Pipeline
+
+1. Create or update index
+2. Answer the question""")
 
 app.add_middleware(
     CORSMiddleware,
@@ -61,15 +69,15 @@ async def exception_handler(_: Request, e: Exception) -> Response:
 v1 = APIRouter(prefix="/api/v1")
 
 
-@v1.put("/index/{namespace}/{element_id}", response_model=None)
-async def create_or_update(namespace: str, element_id: str, request: InsertRequest):
+@v1.put("/index/{namespace}/{element_id}", response_model=None, tags=["Index"])
+async def create_or_update_index(namespace: str, element_id: str, request: InsertRequest):
     pipeline.retriever.vector_db.remove(namespace, element_id)
     chunk_list: List[Chunk] = split_markdown(namespace, element_id, request.title, request.content)
     pipeline.retriever.vector_db.insert(chunk_list)
 
 
-@v1.delete("/index/{namespace}/{element_id}", response_model=None)
-async def delete(namespace: str, element_id: str):
+@v1.delete("/index/{namespace}/{element_id}", response_model=None, tags=["Index"])
+async def delete_index(namespace: str, element_id: str):
     pipeline.retriever.vector_db.remove(namespace, element_id)
 
 
@@ -90,13 +98,16 @@ async def v1_stream(p: Pipeline, request: ChatRequest) -> AsyncIterator[str]:
     yield dumps({"response_type": "done"})
 
 
-@v1.post("/stream")
+@v1.post("/stream", tags=["LLM"], response_model=Union[ChatBaseResponse, ChatDeltaResponse, ChatCitationListResponse])
 async def api_v1_stream(request: ChatRequest):
+    """
+    Answer the query based on user's database.
+    """
     return EventSourceResponse(v1_stream(pipeline, request))
 
 
 # healthcheck
-@v1.get("/health")
+@v1.get("/health", tags=["Metrics"])
 async def api_v1_health():
     return {
         "status": 200,
