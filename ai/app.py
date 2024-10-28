@@ -22,7 +22,7 @@ dumps = partial(json.dumps, ensure_ascii=False, separators=(",", ":"))
 start_time: datetime = datetime.now()
 config: Config = load_config()
 logger = get_logger(__name__)
-pipeline: Pipeline
+pipeline: Pipeline = ...
 
 
 def init():
@@ -32,7 +32,7 @@ def init():
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    # init()
+    init()
     yield
 
 
