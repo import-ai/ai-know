@@ -60,7 +60,7 @@ func parsePosition(parent string, positionAfter string) (int64, int64, error) {
 //	@Description	|      title      |   Yes    |  Title of new entry   |
 //	@Description	|      type       |   Yes    |   Type of new entry   |
 //	@Description	|     parent      |   Yes    |    Parent entry ID    |
-//	@Description	| posistion_after |    No    | Position of new entry |
+//	@Description	| position_after |    No    | Position of new entry |
 //	@Description
 //	@Description	If `position_after` is empty, the new entry will be the first in parent's sub-entries. Otherwise, it's positioned after the specified sub-entry.
 //	@Tags			Sidebar
@@ -177,7 +177,7 @@ func GetEntry(c *fiber.Ctx) error {
 //	@Description	| :-------------: | :------: | :-------------------: |
 //	@Description	|      title      |    No    |  Title of the entry   |
 //	@Description	|     parent      |    No    |    Parent entry ID    |
-//	@Description	| posistion_after |    No    | Position of the entry |
+//	@Description	| position_after |    No    | Position of the entry |
 //	@Description
 //	@Description	> - If `title` is non-empty, update title of the entry.
 //	@Description	> - If `parent` is non-empty, move the entry to the specified parent entry.
@@ -311,7 +311,7 @@ func GetSubEntries(c *fiber.Ctx) error {
 //	@Description	| :-------------: | :------: | :-------------------: |
 //	@Description	|      title      |    No    |  Title of new entry   |
 //	@Description	|     parent      |   Yes    |    Parent entry ID    |
-//	@Description	| posistion_after |    No    | Position of new entry |
+//	@Description	| position_after  |    No    | Position of new entry |
 //	@Description
 //	@Description	If `title` is empty, it will default to the old entry’s title.
 //	@Description	If `position_after` is empty, the new entry will be the first in parent's sub-entries. Otherwise, it's positioned after the specified sub-entry.
