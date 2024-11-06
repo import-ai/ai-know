@@ -13,7 +13,7 @@ class VectorDB:
         self.data_dir: str = path
         self.client = chromadb.PersistentClient(path=path)
         self.collection = self.client.get_or_create_collection(
-            name="default", metadata={"hnsw:space": "cosine"},
+            name="default", metadata={"hnsw:space": "ip"},
             embedding_function=sef(model_name=model_name_or_path, device=device)
         )
         self.batch_size: int = batch_size
