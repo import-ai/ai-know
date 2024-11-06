@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/import-ai/ai-know/server/config"
 	"github.com/rs/zerolog/log"
-	"github.com/ycdzj/shuinotes/server/config"
 )
 
 func GenerateJWT(user string, exp time.Time) (string, error) {

@@ -1,0 +1,274 @@
+definitions:
+  handlers.CreateEntry.Req:
+    properties:
+      parent:
+        example: "10000003"
+        type: string
+      position_after:
+        example: "10000002"
+        type: string
+      title:
+        example: Note Title
+        type: string
+      type:
+        example: note
+        type: string
+    type: object
+  handlers.CreateEntry.Resp:
+    properties:
+      entry:
+        $ref: '#/definitions/handlers.Entry'
+    type: object
+  handlers.DuplicateEntry.Req:
+    properties:
+      parent:
+        example: "10000003"
+        type: string
+      position_after:
+        example: "10000002"
+        type: string
+      title:
+        example: Note Title
+        type: string
+    type: object
+  handlers.DuplicateEntry.Resp:
+    properties:
+      entry:
+        $ref: '#/definitions/handlers.Entry'
+    type: object
+  handlers.Entries:
+    properties:
+      private:
+        example: "1000001"
+        type: string
+      team:
+        example: "1000002"
+        type: string
+    type: object
+  handlers.Entry:
+    properties:
+      has_sub_entries:
+        example: false
+        type: boolean
+      id:
+        example: "1000005"
+        type: string
+      title:
+        example: Note Title
+        type: string
+      type:
+        enum:
+        - note
+        - group
+        - link
+        example: note
+        type: string
+    type: object
+  handlers.GetEntry.Resp:
+    properties:
+      entry:
+        $ref: '#/definitions/handlers.Entry'
+    type: object
+  handlers.GetSubEntries.Resp:
+    properties:
+      sub_entries:
+        items:
+          $ref: '#/definitions/handlers.Entry'
+        type: array
+    type: object
+  handlers.GetWorkspace.Resp:
+    properties:
+      entries:
+        $ref: '#/definitions/handlers.Entries'
+    type: object
+  handlers.PutEntry.Req:
+    properties:
+      parent:
+        example: "10000003"
+        type: string
+      position_after:
+        example: "10000002"
+        type: string
+      title:
+        example: Note Title
+        type: string
+    type: object
+  handlers.PutEntry.Resp:
+    properties:
+      entry:
+        $ref: '#/definitions/handlers.Entry'
+    type: object
+info:
+  contact: {}
+  description: |-
+    ## Sidebar 多级列表
+
+    列表的每一项是一个`entry`，主要字段是`id`，`type`和`title`。
+
+    - `id`: 全局唯一标识
+    - `type`: 合法取值为`note`，`group`或`link`
+    - `title`: 标题
+
+    一个`entry`下可以嵌套子`entry`，形成树形结构。
+
+    ### 查询流程
+
+    1. 调用`Get Workspace`拿到 Private 和 Team Space 分别对应的最外层`entry id`。
+    2. 调用`Get Sub-Entries`，传参`entry id`，拿到该`entry`直接嵌套的子`entry`列表。
+    3. 如果子`entry`继续嵌套子`entry`（`has_sub_entries`为`true`），递归调用`Get Sub-Entries`。
+
+    ### 拖拽/移动流程
+
+    调用`Update Entry`，更新`entry`的`parent`和`position`。
+  title: AIKnow API
+  version: "1.0"
+paths:
+  /api/sidebar/entries:
+    post:
+      description: |-
+        Create an entry with the specified properties.
+        |      Field      | Required |      Description      |
+        | :-------------: | :------: | :-------------------: |
+        |      title      |   Yes    |  Title of new entry   |
+        |      type       |   Yes    |   Type of new entry   |
+        |     parent      |   Yes    |    Parent entry ID    |
+        | posistion_after |    No    | Position of new entry |
+
+        If `position_after` is empty, the new entry will be the first in parent's sub-entries. Otherwise, it's positioned after the specified sub-entry.
+      parameters:
+      - description: Request Body
+        in: body
+        name: Body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateEntry.Req'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CreateEntry.Resp'
+      summary: Create Entry
+      tags:
+      - Sidebar
+  /api/sidebar/entries/{entry_id}:
+    delete:
+      description: Delete an entry and all its sub-entries.
+      parameters:
+      - description: Entry ID
+        in: path
+        name: entry_id
+        required: true
+        type: string
+      responses: {}
+      summary: Delete Entry
+      tags:
+      - Sidebar
+    get:
+      description: Get properties of an entry.
+      parameters:
+      - description: Entry ID
+        in: path
+        name: entry_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.GetEntry.Resp'
+      summary: Get Entry
+      tags:
+      - Sidebar
+    put:
+      description: |-
+        Update properties of an entry.
+        |      Field      | Required |      Description      |
+        | :-------------: | :------: | :-------------------: |
+        |      title      |    No    |  Title of the entry   |
+        |     parent      |    No    |    Parent entry ID    |
+        | posistion_after |    No    | Position of the entry |
+
+        > - If `title` is non-empty, update title of the entry.
+        > - If `parent` is non-empty, move the entry to the specified parent entry.
+        >     - If `position_after` is empty, the new entry will be the first in parent's sub-entries. Otherwise, it's positioned after the specified sub-entry.
+      parameters:
+      - description: Entry ID
+        in: path
+        name: entry_id
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: Body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.PutEntry.Req'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.PutEntry.Resp'
+      summary: Update Entry
+      tags:
+      - Sidebar
+  /api/sidebar/entries/{entry_id}/duplicate:
+    post:
+      description: |-
+        Duplicate an entry.
+        |      Field      | Required |      Description      |
+        | :-------------: | :------: | :-------------------: |
+        |      title      |    No    |  Title of new entry   |
+        |     parent      |   Yes    |    Parent entry ID    |
+        | posistion_after |    No    | Position of new entry |
+
+        If `title` is empty, it will default to the old entry’s title.
+        If `position_after` is empty, the new entry will be the first in parent's sub-entries. Otherwise, it's positioned after the specified sub-entry.
+      parameters:
+      - description: Entry ID
+        in: path
+        name: entry_id
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: Body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.DuplicateEntry.Req'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.DuplicateEntry.Resp'
+      summary: Duplicate Entry
+      tags:
+      - Sidebar
+  /api/sidebar/entries/{entry_id}/sub_entries:
+    get:
+      description: Get sub-entries of an entry.
+      parameters:
+      - description: Entry ID
+        in: path
+        name: entry_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.GetSubEntries.Resp'
+      summary: Get Sub-Entries
+      tags:
+      - Sidebar
+  /api/workspace:
+    get:
+      description: Get properties of current workspace.
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.GetWorkspace.Resp'
+      summary: Get Workspace
+      tags:
+      - Workspace
+swagger: "2.0"

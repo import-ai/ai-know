@@ -2,39 +2,38 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/ycdzj/shuinotes/server/handlers"
-	"github.com/ycdzj/shuinotes/server/middlewares"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/swagger"
+	_ "github.com/import-ai/ai-know/server/docs"
+	"github.com/import-ai/ai-know/server/handlers"
+	"github.com/import-ai/ai-know/server/middlewares"
 )
+
+func registerSidebarAPI(router fiber.Router) {
+	router.Route("/entries", func(router fiber.Router) {
+		router.Post("", handlers.CreateEntry)
+		router.Route("/:entry_id", func(router fiber.Router) {
+			router.Use(handlers.ParseEntryID)
+			router.Get("", handlers.GetEntry)
+			router.Put("", handlers.PutEntry)
+			router.Delete("", handlers.DeleteEntry)
+			router.Get("/sub_entries", handlers.GetSubEntries)
+			router.Post("/duplicate", handlers.DuplicateEntry)
+		})
+	})
+}
 
 func RegisterRoutes(router fiber.Router) {
 	router.Use(middlewares.NewRecovery())
+	router.Use(logger.New())
 
-	router = router.Group("/api")
-
-	router.Post("/login", handlers.HandleLogin)
-	router.Post("/logout", handlers.HandleLogout)
-	router.Post("/register", handlers.HandleRegister)
-
-	router.Use(middlewares.NewJWTAuth())
-
-	prefix := router.Group("/user")
-	prefix.Get("", handlers.HandleGetAuthorizedUser)
-
-	prefix = router.Group("/kbs")
-	prefix.Get("", handlers.HandleListKBs)
-	prefix.Post("", handlers.HandleCreateKB)
-
-	prefix = router.Group("/kbs/:kb_id")
-	prefix.Get("", handlers.HandleGetKB)
-	prefix.Put("", handlers.HandleUpdateKB)
-	prefix.Delete("", handlers.HandleDeleteKB)
-
-	prefix = router.Group("/kbs/:kb_id/notes")
-	prefix.Get("", handlers.HandleListNotes)
-	prefix.Post("", handlers.HandleCreateNote)
-
-	prefix = router.Group("/kbs/:kb_id/notes/:note_id")
-	prefix.Get("", handlers.HandleGetNote)
-	prefix.Put("", handlers.HandleUpdateNote)
-	prefix.Delete("", handlers.HandleDeleteNote)
+	router.Get("/swagger/*", swagger.HandlerDefault)
+	router.Route("/api", func(router fiber.Router) {
+		router.Route("/sidebar", func(router fiber.Router) {
+			registerSidebarAPI(router)
+		})
+		router.Route("/workspace", func(router fiber.Router) {
+			router.Get("", handlers.GetWorkspace)
+		})
+	})
 }
